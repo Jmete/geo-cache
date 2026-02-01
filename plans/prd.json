@@ -53,7 +53,7 @@
         "Confirm response matches the agreed shape: input/raw + normalizedKey, canonical fields, optional point/bbox, confidence 0..1, flags, provider, cache.hit.",
         "Document v1 stability rules: additive changes allowed; breaking changes require `/v2`."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },

@@ -6,3 +6,15 @@
 - Problematic examples cover: ISO codes, misspellings, extra punctuation, whitespace, diacritics, alternative country names (KSA, UAE), swapped order, mixed case, hyphenated names, article prefixes
 - 8 acceptance fixtures with expected normalizedKey for unit test validation
 - Files: fixtures/location-strings.json
+
+## F003 - API Contract Definition [COMPLETE]
+- Created TypeScript types for v1 API in src/types/api.ts
+- GeocodeRequest: { text: string } with 1-512 char limit documented
+- GeocodeResponse: input.raw, normalizedKey, canonical (countryIso2/countryName/admin1?/city?/displayName), granularity, point?, bbox?, confidence 0-1, flags, provider, cache.hit
+- ErrorResponse: { error: { code, message, details? } }
+- Status codes documented: 400/401/403/405/429/500/502, retryable: 429/502
+- Internal types: ParsedLocation, ProviderCandidate, ScoredCandidate
+- v1 stability: additive changes ok, breaking = v2
+- Set up project: package.json, tsconfig.json, eslint.config.js, vitest.config.ts
+- Type tests validate all shapes compile and are usable
+- Files: src/types/api.ts, src/types/index.ts, src/types/api.test.ts, package.json, tsconfig.json, eslint.config.js, vitest.config.ts
