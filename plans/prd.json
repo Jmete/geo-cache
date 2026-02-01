@@ -39,7 +39,7 @@
         "Identify at least 10 problematic examples (misspellings, swapped token order, extra punctuation, alternative country names like KSA).",
         "Produce a short list of acceptance examples to use as fixtures for unit/E2E tests."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },

@@ -1,0 +1,8 @@
+# Geo-Cache Development Progress
+
+## F002 - Discovery: LLM Location String Fixtures [COMPLETE]
+- Created fixtures/location-strings.json with 37 location string examples
+- Categories: city+region+country (10), region+country (6), country-only (4), multi-area (3), problematic (13)
+- Problematic examples cover: ISO codes, misspellings, extra punctuation, whitespace, diacritics, alternative country names (KSA, UAE), swapped order, mixed case, hyphenated names, article prefixes
+- 8 acceptance fixtures with expected normalizedKey for unit test validation
+- Files: fixtures/location-strings.json

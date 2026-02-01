@@ -1,0 +1,570 @@
+{
+  "description": "LLM-generated location string fixtures for geocoding tests (F002)",
+  "version": "1.0.0",
+  "categories": {
+    "city_region_country": "Full address with city, region/admin1, and country",
+    "region_country": "Region/admin1 and country only",
+    "country_only": "Country name only",
+    "multi_area": "Multiple areas indicator",
+    "problematic": "Edge cases: misspellings, alternative names, punctuation issues"
+  },
+  "fixtures": [
+    {
+      "id": "CRC001",
+      "category": "city_region_country",
+      "input": "Riyadh, Riyadh Region, Saudi Arabia",
+      "expected": {
+        "city": "Riyadh",
+        "admin1": "Riyadh Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC002",
+      "category": "city_region_country",
+      "input": "Jeddah, Makkah Region, Saudi Arabia",
+      "expected": {
+        "city": "Jeddah",
+        "admin1": "Makkah Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC003",
+      "category": "city_region_country",
+      "input": "Dammam, Eastern Province, Saudi Arabia",
+      "expected": {
+        "city": "Dammam",
+        "admin1": "Eastern Province",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC004",
+      "category": "city_region_country",
+      "input": "Mecca, Makkah Region, Saudi Arabia",
+      "expected": {
+        "city": "Mecca",
+        "admin1": "Makkah Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC005",
+      "category": "city_region_country",
+      "input": "Medina, Al Madinah Region, Saudi Arabia",
+      "expected": {
+        "city": "Medina",
+        "admin1": "Al Madinah Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC006",
+      "category": "city_region_country",
+      "input": "Tabuk, Tabuk Region, Saudi Arabia",
+      "expected": {
+        "city": "Tabuk",
+        "admin1": "Tabuk Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC007",
+      "category": "city_region_country",
+      "input": "Sharurah, Najran Region, Saudi Arabia",
+      "expected": {
+        "city": "Sharurah",
+        "admin1": "Najran Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC008",
+      "category": "city_region_country",
+      "input": "Dubai, Dubai, United Arab Emirates",
+      "expected": {
+        "city": "Dubai",
+        "admin1": "Dubai",
+        "countryText": "United Arab Emirates",
+        "countryIso2": "AE",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC009",
+      "category": "city_region_country",
+      "input": "Cairo, Cairo Governorate, Egypt",
+      "expected": {
+        "city": "Cairo",
+        "admin1": "Cairo Governorate",
+        "countryText": "Egypt",
+        "countryIso2": "EG",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC010",
+      "category": "city_region_country",
+      "input": "Amman, Amman Governorate, Jordan",
+      "expected": {
+        "city": "Amman",
+        "admin1": "Amman Governorate",
+        "countryText": "Jordan",
+        "countryIso2": "JO",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "CRC011",
+      "category": "city_region_country",
+      "input": "Doha, Ad Dawhah, Qatar",
+      "expected": {
+        "city": "Doha",
+        "admin1": "Ad Dawhah",
+        "countryText": "Qatar",
+        "countryIso2": "QA",
+        "isMultiArea": false,
+        "granularity": "city"
+      }
+    },
+    {
+      "id": "RC001",
+      "category": "region_country",
+      "input": "Najran Region, Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": "Najran Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "region"
+      }
+    },
+    {
+      "id": "RC002",
+      "category": "region_country",
+      "input": "Eastern Province, Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": "Eastern Province",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "region"
+      }
+    },
+    {
+      "id": "RC003",
+      "category": "region_country",
+      "input": "Asir Region, Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": "Asir Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "region"
+      }
+    },
+    {
+      "id": "RC004",
+      "category": "region_country",
+      "input": "Jazan Region, Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": "Jazan Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "region"
+      }
+    },
+    {
+      "id": "RC005",
+      "category": "region_country",
+      "input": "Al Bahah Region, Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": "Al Bahah Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "region"
+      }
+    },
+    {
+      "id": "RC006",
+      "category": "region_country",
+      "input": "Sharjah, United Arab Emirates",
+      "expected": {
+        "city": null,
+        "admin1": "Sharjah",
+        "countryText": "United Arab Emirates",
+        "countryIso2": "AE",
+        "isMultiArea": false,
+        "granularity": "region"
+      }
+    },
+    {
+      "id": "CO001",
+      "category": "country_only",
+      "input": "Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "country"
+      }
+    },
+    {
+      "id": "CO002",
+      "category": "country_only",
+      "input": "United Arab Emirates",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "United Arab Emirates",
+        "countryIso2": "AE",
+        "isMultiArea": false,
+        "granularity": "country"
+      }
+    },
+    {
+      "id": "CO003",
+      "category": "country_only",
+      "input": "Egypt",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "Egypt",
+        "countryIso2": "EG",
+        "isMultiArea": false,
+        "granularity": "country"
+      }
+    },
+    {
+      "id": "CO004",
+      "category": "country_only",
+      "input": "Jordan",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "Jordan",
+        "countryIso2": "JO",
+        "isMultiArea": false,
+        "granularity": "country"
+      }
+    },
+    {
+      "id": "MA001",
+      "category": "multi_area",
+      "input": "Multiple Areas, Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": true,
+        "granularity": "multi"
+      }
+    },
+    {
+      "id": "MA002",
+      "category": "multi_area",
+      "input": "multiple areas, United Arab Emirates",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "United Arab Emirates",
+        "countryIso2": "AE",
+        "isMultiArea": true,
+        "granularity": "multi"
+      }
+    },
+    {
+      "id": "MA003",
+      "category": "multi_area",
+      "input": "MULTIPLE AREAS, Egypt",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "Egypt",
+        "countryIso2": "EG",
+        "isMultiArea": true,
+        "granularity": "multi"
+      }
+    },
+    {
+      "id": "PROB001",
+      "category": "problematic",
+      "subcategory": "alternative_country_name",
+      "input": "Riyadh, KSA",
+      "expected": {
+        "city": "Riyadh",
+        "admin1": null,
+        "countryText": "KSA",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "KSA is common abbreviation for Saudi Arabia"
+    },
+    {
+      "id": "PROB002",
+      "category": "problematic",
+      "subcategory": "iso_codes",
+      "input": "Riyadh, SA",
+      "expected": {
+        "city": "Riyadh",
+        "admin1": null,
+        "countryText": "SA",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "ISO2 code used directly"
+    },
+    {
+      "id": "PROB003",
+      "category": "problematic",
+      "subcategory": "iso_codes",
+      "input": "Jeddah, SAU",
+      "expected": {
+        "city": "Jeddah",
+        "admin1": null,
+        "countryText": "SAU",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "ISO3 code used directly"
+    },
+    {
+      "id": "PROB004",
+      "category": "problematic",
+      "subcategory": "misspelling",
+      "input": "Riyad, Saudi Arabia",
+      "expected": {
+        "city": "Riyad",
+        "admin1": null,
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "Missing 'h' in Riyadh - fuzzy match needed"
+    },
+    {
+      "id": "PROB005",
+      "category": "problematic",
+      "subcategory": "misspelling",
+      "input": "Jedda, Saudi Arabia",
+      "expected": {
+        "city": "Jedda",
+        "admin1": null,
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "Misspelling of Jeddah - fuzzy match needed"
+    },
+    {
+      "id": "PROB006",
+      "category": "problematic",
+      "subcategory": "extra_punctuation",
+      "input": "Riyadh,, Riyadh Region,, Saudi Arabia",
+      "expected": {
+        "city": "Riyadh",
+        "admin1": "Riyadh Region",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "Double commas should be handled"
+    },
+    {
+      "id": "PROB007",
+      "category": "problematic",
+      "subcategory": "extra_whitespace",
+      "input": "  Riyadh ,  Saudi Arabia  ",
+      "expected": {
+        "city": "Riyadh",
+        "admin1": null,
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "Extra whitespace should be trimmed"
+    },
+    {
+      "id": "PROB008",
+      "category": "problematic",
+      "subcategory": "diacritics",
+      "input": "Riyāḍh, Saudi Arabia",
+      "expected": {
+        "city": "Riyāḍh",
+        "admin1": null,
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "Arabic transliteration with diacritics"
+    },
+    {
+      "id": "PROB009",
+      "category": "problematic",
+      "subcategory": "alternative_country_name",
+      "input": "Dubai, UAE",
+      "expected": {
+        "city": "Dubai",
+        "admin1": null,
+        "countryText": "UAE",
+        "countryIso2": "AE",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "UAE abbreviation for United Arab Emirates"
+    },
+    {
+      "id": "PROB010",
+      "category": "problematic",
+      "subcategory": "swapped_order",
+      "input": "Saudi Arabia, Riyadh",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "country"
+      },
+      "notes": "Swapped order - country first. Parser should detect country and handle appropriately"
+    },
+    {
+      "id": "PROB011",
+      "category": "problematic",
+      "subcategory": "mixed_case",
+      "input": "RIYADH, SAUDI ARABIA",
+      "expected": {
+        "city": "RIYADH",
+        "admin1": null,
+        "countryText": "SAUDI ARABIA",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "All uppercase - should normalize for matching"
+    },
+    {
+      "id": "PROB012",
+      "category": "problematic",
+      "subcategory": "hyphenated",
+      "input": "Al-Khobar, Eastern Province, Saudi Arabia",
+      "expected": {
+        "city": "Al-Khobar",
+        "admin1": "Eastern Province",
+        "countryText": "Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "city"
+      },
+      "notes": "Hyphenated city name"
+    },
+    {
+      "id": "PROB013",
+      "category": "problematic",
+      "subcategory": "article_prefix",
+      "input": "The Kingdom of Saudi Arabia",
+      "expected": {
+        "city": null,
+        "admin1": null,
+        "countryText": "The Kingdom of Saudi Arabia",
+        "countryIso2": "SA",
+        "isMultiArea": false,
+        "granularity": "country"
+      },
+      "notes": "Formal country name with article and prefix"
+    }
+  ],
+  "acceptance_fixtures": [
+    {
+      "id": "ACC001",
+      "input": "Riyadh, Riyadh Region, Saudi Arabia",
+      "purpose": "Standard city+region+country (Saudi)",
+      "expectedNormKey": "SA|riyadh region|riyadh|"
+    },
+    {
+      "id": "ACC002",
+      "input": "Eastern Province, Saudi Arabia",
+      "purpose": "Region-only (Saudi)",
+      "expectedNormKey": "SA|eastern province||"
+    },
+    {
+      "id": "ACC003",
+      "input": "Saudi Arabia",
+      "purpose": "Country-only",
+      "expectedNormKey": "SA|||"
+    },
+    {
+      "id": "ACC004",
+      "input": "Multiple Areas, Saudi Arabia",
+      "purpose": "Multi-area indicator",
+      "expectedNormKey": "SA|||multi"
+    },
+    {
+      "id": "ACC005",
+      "input": "Riyadh, KSA",
+      "purpose": "Alternative country name",
+      "expectedNormKey": "SA||riyadh|"
+    },
+    {
+      "id": "ACC006",
+      "input": "Dubai, United Arab Emirates",
+      "purpose": "Non-Saudi city (global)",
+      "expectedNormKey": "AE||dubai|"
+    },
+    {
+      "id": "ACC007",
+      "input": "  Jeddah ,  Saudi Arabia  ",
+      "purpose": "Whitespace normalization",
+      "expectedNormKey": "SA||jeddah|"
+    },
+    {
+      "id": "ACC008",
+      "input": "RIYADH, SAUDI ARABIA",
+      "purpose": "Case normalization",
+      "expectedNormKey": "SA||riyadh|"
+    }
+  ]
+}
