@@ -42,3 +42,19 @@
 - AMBIGUITY_THRESHOLD = 0.05 constant
 - 71 tests including all acceptance fixtures from F002
 - Files: src/normalize/index.ts, src/normalize/index.test.ts
+
+## F006 - D1 Schema Migrations [COMPLETE]
+- Created migrations/0001_create_geocode_cache.sql
+  - geocode_cache table: id, input_raw, input_norm_key (UNIQUE), canonical fields, point/bbox, confidence, flags_json, provider, timestamps
+  - Index on country_iso2 for queries
+  - CHECK constraints: granularity enum, confidence 0-1
+- Created migrations/0002_create_geocode_events.sql
+  - geocode_events table: id, input_raw, input_norm_key, status, provider, provider_response (truncated), request_id, created_at
+  - Indexes: norm_key, status, created_at
+  - CHECK constraint: status enum (hit/miss/resolved/error/ambiguous)
+- All migrations idempotent via CREATE TABLE/INDEX IF NOT EXISTS
+- Created src/db/schema.ts with TypeScript types: GeocodeCacheRow, GeocodeCacheInsert, GeocodeEventRow, GeocodeEventInsert, EventStatus
+- Helper functions: truncateProviderResponse(), parseFlagsJson(), serializeFlagsJson(), rowToBbox()
+- MAX_PROVIDER_RESPONSE_LENGTH = 2048
+- 40 tests: schema helpers, type compatibility, migration structure validation
+- Files: migrations/0001_create_geocode_cache.sql, migrations/0002_create_geocode_events.sql, src/db/schema.ts, src/db/index.ts, src/db/schema.test.ts, src/db/migrations.test.ts

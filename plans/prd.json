@@ -95,7 +95,7 @@
         "Apply migration to create `geocode_events` with fields needed for minimal audit (raw input, norm key, status, provider, truncated provider_response, created_at).",
         "Verify migrations are idempotent (re-running them does not fail)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "data"
     },
