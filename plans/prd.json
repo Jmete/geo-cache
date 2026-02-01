@@ -1,0 +1,652 @@
+{
+  "project": {
+    "name": "Cloudflare Worker Geocoding API (GeoNames)",
+    "summary": "A Cloudflare Workers (TypeScript) API that accepts LLM-generated location strings, normalizes and resolves them via GeoNames, returns deterministic coordinates + canonical metadata, and caches results in D1 with a KV hot-cache for use in a Next.js mapping app."
+  },
+  "phases": [
+    "Discovery & Requirements",
+    "Architecture & Design",
+    "Implementation (Backend / Data / Integrations)",
+    "Security & Compliance",
+    "Observability & Ops",
+    "Quality (Testing & QA)",
+    "Release & Rollout",
+    "Documentation & Enablement"
+  ],
+  "items": [
+    {
+      "id": "F001",
+      "category": "assumption",
+      "description": "Assume GeoNames usage (username-based) is available for server-side geocoding and within expected rate/quota limits for the MVP.",
+      "dependencies": [],
+      "steps": [
+        "Confirm a valid GeoNames username exists and can successfully call the GeoNames API from a non-browser environment.",
+        "Document the expected daily/hourly request volume and confirm it is compatible with GeoNames limits for the MVP usage.",
+        "If the quota/limits are insufficient, record the required mitigation (additional provider, stronger caching, batch, or throttling)."
+      ],
+      "passes": false,
+      "notes": "If limits are too low, add a second provider or strengthen cache strategy before production rollout.",
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F002",
+      "category": "discovery",
+      "description": "Validate the expected input patterns and edge cases from the LLM (Saudi-centric + global) to tune parsing and scoring rules.",
+      "dependencies": [],
+      "steps": [
+        "Collect at least 30 real examples of location strings produced by the LLM (including city+region+country, region+country, country-only, and multi-area).",
+        "Identify at least 10 problematic examples (misspellings, swapped token order, extra punctuation, alternative country names like KSA).",
+        "Produce a short list of acceptance examples to use as fixtures for unit/E2E tests."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F003",
+      "category": "api",
+      "description": "Define the v1 API contract (request/response types) and versioning rules for deterministic consumption by Next.js.",
+      "dependencies": ["F002"],
+      "steps": [
+        "Confirm `POST /v1/geocode` accepts `{ \"text\": string }` and rejects missing/empty text with HTTP 400.",
+        "Confirm response matches the agreed shape: input/raw + normalizedKey, canonical fields, optional point/bbox, confidence 0..1, flags, provider, cache.hit.",
+        "Document v1 stability rules: additive changes allowed; breaking changes require `/v2`."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F004",
+      "category": "api",
+      "description": "Define a consistent error response format and status code mapping for client-safe handling.",
+      "dependencies": ["F003"],
+      "steps": [
+        "Specify an error JSON shape (e.g., `{error:{code,message,details?}}`) and use it for all non-2xx responses except OPTIONS.",
+        "Map at least: 400 invalid input, 401 missing/invalid API key, 403 origin not allowed, 405 wrong method, 429 rate limited, 502 provider failure, 500 internal error.",
+        "Verify the client can distinguish retryable errors (429/502) from non-retryable errors (400/401/403/405)."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F005",
+      "category": "non_functional",
+      "description": "Specify deterministic normalization and cache key rules to ensure repeatable geocoding results over time.",
+      "dependencies": ["F003"],
+      "steps": [
+        "Given identical raw text inputs, confirm the produced normalizedKey is identical across repeated calls and deployments.",
+        "Given inputs differing only in casing/whitespace/diacritics/punctuation, confirm the normalizedKey is identical.",
+        "Document tie-break rules for candidates so the same best candidate is chosen deterministically when scores match closely."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F006",
+      "category": "data",
+      "description": "Create D1 schema migrations for geocode cache and minimal event logging tables.",
+      "dependencies": ["F003"],
+      "steps": [
+        "Apply migration to create `geocode_cache` with a unique constraint on `input_norm_key` and an index on `country_iso2`.",
+        "Apply migration to create `geocode_events` with fields needed for minimal audit (raw input, norm key, status, provider, truncated provider_response, created_at).",
+        "Verify migrations are idempotent (re-running them does not fail)."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "data"
+    },
+    {
+      "id": "F007",
+      "category": "release",
+      "description": "Set up Wrangler configuration for Worker, D1 binding, KV binding, environment variables, and secrets.",
+      "dependencies": ["F006"],
+      "steps": [
+        "Verify Wrangler config includes D1 binding `DB` and KV binding `GEO_KV` and they are accessible from the Worker runtime.",
+        "Store `GEONAMES_USERNAME` and `API_KEY` as secrets and confirm they are not logged or returned in errors.",
+        "Set `ALLOWED_ORIGINS` as a comma-separated allowlist and confirm different values can be used per environment."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "devops"
+    },
+    {
+      "id": "F008",
+      "category": "functional",
+      "description": "Initialize Worker TypeScript project using Hono and implement route skeleton for /health and /v1/geocode.",
+      "dependencies": ["F007"],
+      "steps": [
+        "Deploy a minimal Worker that responds 200 on `GET /health` with a small JSON payload.",
+        "Verify `POST /v1/geocode` returns 501 (or a placeholder error) before feature implementation, using the standard error format.",
+        "Verify unsupported routes return 404 in the standard error format."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F009",
+      "category": "security",
+      "description": "Implement strict CORS allowlist for allowed origins and correct preflight handling for all routes.",
+      "dependencies": ["F008"],
+      "steps": [
+        "From an allowed Origin, verify browser preflight (OPTIONS) returns appropriate CORS headers for `POST /v1/geocode`.",
+        "From a disallowed Origin, verify the response does not include permissive CORS headers and results in a blocked browser call.",
+        "Verify allowed headers include at least `content-type` and `x-api-key`."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F010",
+      "category": "security",
+      "description": "Require `x-api-key` authentication for all non-health endpoints and ensure safe comparison and error handling.",
+      "dependencies": ["F008", "F009"],
+      "steps": [
+        "Call `GET /health` without `x-api-key` and verify it returns 200.",
+        "Call `POST /v1/geocode` without `x-api-key` and verify it returns 401 with standard error JSON and no sensitive details.",
+        "Call `POST /v1/geocode` with an incorrect `x-api-key` and verify 401; with correct key verify authentication passes."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F011",
+      "category": "security",
+      "description": "Harden request handling: method restrictions, JSON parsing, payload limits, and input validation.",
+      "dependencies": ["F004", "F008"],
+      "steps": [
+        "Send invalid JSON to `POST /v1/geocode` and verify HTTP 400 with standard error JSON.",
+        "Send `{ \"text\": \"\" }` and verify HTTP 400; send overly long text (e.g., > 512 chars) and verify HTTP 400.",
+        "Send `GET /v1/geocode` and verify HTTP 405 with standard error JSON."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F012",
+      "category": "security",
+      "description": "Apply Cloudflare rate limiting rules per API key to protect GeoNames quotas and mitigate abuse.",
+      "dependencies": ["F010"],
+      "steps": [
+        "Define a rate limit policy (requests/minute per API key) and document it as an operational control.",
+        "Trigger the rate limit in a staging environment and verify the API returns 429 with standard error JSON.",
+        "Verify rate limiting does not affect `GET /health`."
+      ],
+      "passes": false,
+      "notes": "Implement via Cloudflare WAF/Rate Limiting configuration; exact mechanism may depend on account features.",
+      "risk": "medium",
+      "owner": "devops"
+    },
+    {
+      "id": "F013",
+      "category": "functional",
+      "description": "Implement deterministic parsing of comma-separated tokens and multi-area detection.",
+      "dependencies": ["F005", "F011"],
+      "steps": [
+        "Input 'Riyadh, Riyadh Region, Saudi Arabia' yields parsed city='Riyadh', admin1='Riyadh Region', countryText='Saudi Arabia', isMultiArea=false.",
+        "Input 'Najran Region, Saudi Arabia' yields parsed admin1='Najran Region', countryText='Saudi Arabia', city unset, isMultiArea=false.",
+        "Input containing 'Multiple Areas' (case-insensitive) yields isMultiArea=true and granularityHint='multi'."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F014",
+      "category": "functional",
+      "description": "Implement token normalization utilities (casefold, diacritics removal, punctuation trimming, whitespace/hyphen normalization).",
+      "dependencies": ["F013"],
+      "steps": [
+        "Given tokens with extra spaces/punctuation, confirm normalized tokens are stable and consistent (e.g., 'Riyāḍh.' -> 'riyadh').",
+        "Verify normalization does not delete meaningful alphabetic characters (e.g., keeps letters and numbers).",
+        "Confirm normalization output is used for key generation and similarity scoring, while raw input is preserved."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F015",
+      "category": "integration",
+      "description": "Resolve country to ISO2 using offline mappings (accept ISO2/ISO3 and common English names) before provider calls.",
+      "dependencies": ["F014"],
+      "steps": [
+        "Input with ISO2 country (e.g., 'Riyadh, SA') resolves to countryIso2='SA'.",
+        "Input with ISO3 country (e.g., 'Riyadh, SAU') resolves to countryIso2='SA'.",
+        "Input with country name (e.g., 'Saudi Arabia') resolves to countryIso2='SA' without an external call when supported by offline mapping."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F016",
+      "category": "integration",
+      "description": "Fallback to GeoNames country search (PCLI) to resolve countryIso2 when offline mapping fails.",
+      "dependencies": ["F015"],
+      "steps": [
+        "Provide a countryText not recognized offline and verify the system calls GeoNames with country-level constraints and extracts a valid ISO2 code when possible.",
+        "If no country match exists, verify geocoding returns HTTP 200 with low confidence and `flags.ambiguous=true` (or a clear failure code if preferred in design), per documented behavior.",
+        "Verify provider timeouts produce a retryable error (502) rather than hanging."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F017",
+      "category": "functional",
+      "description": "Generate normalized cache keys in the format `<countryIso2>|<admin1_norm>|<city_norm>|<multi_flag>`.",
+      "dependencies": ["F014", "F015", "F016"],
+      "steps": [
+        "Input 'Riyadh, Saudi Arabia' produces normalizedKey 'SA||riyadh|'.",
+        "Input 'Eastern Province, Saudi Arabia' produces normalizedKey 'SA|eastern province||'.",
+        "Input 'Multiple Areas, Saudi Arabia' produces normalizedKey 'SA|||multi'."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F018",
+      "category": "data",
+      "description": "Implement KV hot-cache read/write of the full response with a 30-day TTL and deterministic serialization.",
+      "dependencies": ["F017", "F007"],
+      "steps": [
+        "On cache hit, verify response returns with `cache.hit=true` and matches the stored payload exactly.",
+        "On cache miss, verify the response is written to KV and can be retrieved on a subsequent call within TTL.",
+        "Verify KV entries expire after TTL in a test/staging environment (or via configuration inspection if TTL expiry cannot be forced quickly)."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F019",
+      "category": "data",
+      "description": "Implement D1 lookup by `input_norm_key` and map stored rows back into the API response shape.",
+      "dependencies": ["F006", "F017"],
+      "steps": [
+        "Insert a known cache record and verify `POST /v1/geocode` returns it correctly with `cache.hit=true` (D1 hit when KV is empty).",
+        "Verify bbox and flags are correctly parsed from stored JSON strings (if stored as text).",
+        "Verify missing optional fields in storage do not break response (null-safe mapping)."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "data"
+    },
+    {
+      "id": "F020",
+      "category": "integration",
+      "description": "Create provider abstraction (interfaces + pipeline) supporting GeoNames first and easy addition of future providers.",
+      "dependencies": ["F003", "F004"],
+      "steps": [
+        "Verify the provider interface can return a list of candidates with normalized fields (lat/lon/country/admin1/city, featureClass/featureCode).",
+        "Verify the pipeline can call providers in order and aggregate candidates into a single list.",
+        "Verify a provider timeout leads to a pipeline-controlled failure behavior rather than an unhandled exception."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F021",
+      "category": "integration",
+      "description": "Implement GeoNames provider city-level query using searchJSON with populated place filters and fuzzy matching.",
+      "dependencies": ["F020", "F015", "F016"],
+      "steps": [
+        "Given a city+country input, verify a GeoNames request is made that favors populated places and includes fuzzy matching.",
+        "Verify the provider returns candidates with lat/lon and includes providerId (GeoNameId) when present.",
+        "Verify provider fetch uses a strict timeout and returns a controlled error on timeout."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F022",
+      "category": "integration",
+      "description": "Implement GeoNames provider region-level query using ADM1 filters and fuzzy matching.",
+      "dependencies": ["F020", "F015", "F016"],
+      "steps": [
+        "Given admin1+country input, verify a GeoNames request is made that targets ADM1 regions (feature class A, ADM1).",
+        "Verify returned candidates include admin1 and countryIso2 where available.",
+        "Verify empty results are handled gracefully (no exception) and are eligible for fallback behavior."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F023",
+      "category": "integration",
+      "description": "Implement GeoNames provider country-level query using PCLI filter and return centroid and bbox when available.",
+      "dependencies": ["F020"],
+      "steps": [
+        "Given country-only input, verify a GeoNames request targets country-level results (PCLI) and returns a candidate with a representative point.",
+        "Verify bbox is extracted when present and mapped into `[west,south,east,north]`.",
+        "Verify provider returns an empty list (not error) when no match exists."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F024",
+      "category": "functional",
+      "description": "Implement candidate scoring (country/admin/city similarity, feature type match, importance proxy) and compute confidence 0..1.",
+      "dependencies": ["F021", "F022", "F023", "F014"],
+      "steps": [
+        "Given an input with countryIso2, verify candidates with matching country receive higher scores than mismatched countries.",
+        "Given an input with admin1/city tokens, verify similarity scoring increases score for closer matches and decreases for mismatches.",
+        "Verify confidence is clamped to [0,1] and decreases appropriately when only weak matches exist."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F025",
+      "category": "functional",
+      "description": "Select best candidate deterministically, apply ambiguity rule (top2 within 0.05), and set flags accordingly.",
+      "dependencies": ["F024", "F005"],
+      "steps": [
+        "When two candidates score within 0.05, verify the response sets `flags.ambiguous=true` and reduces confidence per documented behavior.",
+        "Verify tie-break behavior is deterministic (e.g., score desc, importance/population desc, providerId asc) and stable across runs.",
+        "Verify candidates with known country mismatch are rejected when countryIso2 is known."
+      ],
+      "passes": false,
+      "risk": "high",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F026",
+      "category": "functional",
+      "description": "Compute granularity and canonical fields (city/region/country/multi) and generate displayName consistently.",
+      "dependencies": ["F013", "F025"],
+      "steps": [
+        "City input yields `granularity='city'` and canonical includes city and countryIso2; region input yields `granularity='region'` and canonical includes admin1 and countryIso2.",
+        "Country-only input yields `granularity='country'` and canonical includes countryIso2; multi-area yields `granularity='multi'` and sets `flags.multiArea=true`.",
+        "Verify displayName is stable and consistent (e.g., 'City, Region, Country' or best available combination)."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F027",
+      "category": "functional",
+      "description": "Implement provider fallback detection and validation flags (adminMismatch, providerFallback) without breaking determinism.",
+      "dependencies": ["F025"],
+      "steps": [
+        "When strict query returns none and relaxed query returns results, verify `flags.providerFallback=true`.",
+        "If input admin1 exists and best candidate admin1 similarity is below threshold, verify `flags.adminMismatch=true`.",
+        "Verify flags are persisted in cache responses (subsequent calls return the same flags)."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F028",
+      "category": "functional",
+      "description": "Implement multi-area behavior using a country centroid point while marking `multiArea=true` and avoiding city-level claims.",
+      "dependencies": ["F026", "F023"],
+      "steps": [
+        "Input 'Multiple Areas, Saudi Arabia' returns `granularity='multi'`, includes `flags.multiArea=true`, and provides a point representing the country centroid (or best available country-level point).",
+        "Verify canonical.city and canonical.admin1 are unset for multi-area responses unless explicitly provided and validated (should be unset for MVP).",
+        "Verify UI-facing fields do not imply a specific city location when multiArea is true."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F029",
+      "category": "data",
+      "description": "Implement D1 upsert for geocode_cache with updated timestamps and stable storage of bbox/flags JSON.",
+      "dependencies": ["F019", "F026", "F027", "F028"],
+      "steps": [
+        "On first miss, verify a new row is inserted with input_raw, input_norm_key, canonical fields, point/bbox, provider, confidence, flags, created_at, updated_at.",
+        "On subsequent calls (same key) after a recompute, verify the existing row is updated (updated_at changes; created_at remains).",
+        "Verify the unique constraint on input_norm_key prevents duplicates and the system still returns a single deterministic result."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "data"
+    },
+    {
+      "id": "F030",
+      "category": "observability",
+      "description": "Log minimal geocoding events to D1 (hit/miss/error/ambiguous) with truncated provider payload for debugging.",
+      "dependencies": ["F006", "F032"],
+      "steps": [
+        "On a cache hit, verify an optional event is recorded only if configured (or record misses/errors only, per MVP decision); confirm behavior matches documentation.",
+        "On a miss that results in a successful provider lookup, verify a `miss` (or `resolved`) status is recorded with provider name.",
+        "On provider errors/timeouts, verify an `error` status is recorded and provider_response is truncated to a safe length."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F031",
+      "category": "observability",
+      "description": "Add structured logging for request IDs, cache status, provider timings, and error categories without leaking secrets.",
+      "dependencies": ["F032"],
+      "steps": [
+        "Verify logs include a request correlation ID and record whether the response was KV hit, D1 hit, or provider call.",
+        "Verify logs include provider latency measurements for uncached calls.",
+        "Verify logs never contain API keys, GeoNames username, or full raw provider responses beyond the truncation policy."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F032",
+      "category": "functional",
+      "description": "Implement end-to-end /v1/geocode flow: normalize → resolve country → cache lookup (KV/D1) → GeoNames → score/select → persist → return.",
+      "dependencies": [
+        "F010",
+        "F011",
+        "F017",
+        "F018",
+        "F019",
+        "F021",
+        "F022",
+        "F023",
+        "F024",
+        "F025",
+        "F026",
+        "F027",
+        "F028",
+        "F029"
+      ],
+      "steps": [
+        "Call `POST /v1/geocode` with 'Riyadh, Saudi Arabia' and verify 200 response includes point, canonical fields, provider name, and confidence in [0,1].",
+        "Repeat the same request and verify `cache.hit=true` and the response is identical (except any explicitly documented cache metadata).",
+        "Call with an input that cannot be resolved and verify behavior matches the documented error/low-confidence policy (no crashes, consistent error format if failing)."
+      ],
+      "passes": false,
+      "risk": "high",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F033",
+      "category": "functional",
+      "description": "Finalize /health endpoint for operational monitoring and smoke checks.",
+      "dependencies": ["F008"],
+      "steps": [
+        "Verify `GET /health` returns 200 with a small JSON including at least `{status:'ok'}` (and optionally version/uptime).",
+        "Verify /health does not require an API key and does not return CORS headers beyond what is required (safe defaults).",
+        "Verify /health remains responsive even when provider calls are failing (no provider dependency)."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F034",
+      "category": "non_functional",
+      "description": "Define and validate basic performance targets for cached and uncached requests in Workers.",
+      "dependencies": ["F032"],
+      "steps": [
+        "With KV hit, verify typical response time is low enough for interactive use (target p95 documented for your environment).",
+        "With D1 hit (KV empty), verify response time remains acceptable and stable under moderate load.",
+        "With provider call, verify provider timeout is enforced and the API returns a response/error within the bounded time."
+      ],
+      "passes": false,
+      "notes": "Exact p95 thresholds depend on environment; document and validate in staging.",
+      "risk": "medium",
+      "owner": "devops"
+    },
+    {
+      "id": "F035",
+      "category": "testing",
+      "description": "Add unit tests for parsing, normalization, multi-area detection, and normalized key generation using collected fixtures.",
+      "dependencies": ["F013", "F014", "F017", "F002"],
+      "steps": [
+        "Run tests confirming all fixture inputs produce the expected parsed fields and normalizedKey.",
+        "Include negative tests for empty tokens, extra commas, and unusual punctuation.",
+        "Verify tests pass in CI and locally with deterministic outcomes."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "qa"
+    },
+    {
+      "id": "F036",
+      "category": "testing",
+      "description": "Add unit tests for country resolution (offline ISO2/ISO3/name) and GeoNames PCLI fallback behavior via mocked fetch.",
+      "dependencies": ["F015", "F016"],
+      "steps": [
+        "Verify ISO2 and ISO3 inputs resolve correctly without network calls.",
+        "Verify unknown country name triggers a mocked GeoNames call and resolves ISO2 when mock response is valid.",
+        "Verify provider timeout mock results in a controlled error outcome."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "qa"
+    },
+    {
+      "id": "F037",
+      "category": "testing",
+      "description": "Add unit tests for scoring, deterministic selection, ambiguity threshold handling, and flag assignment.",
+      "dependencies": ["F024", "F025", "F027"],
+      "steps": [
+        "Provide mocked candidate sets where top2 are within 0.05 and verify `ambiguous=true` and confidence reduction policy is applied.",
+        "Provide mocked candidates with country mismatch and verify they are rejected when input countryIso2 is known.",
+        "Verify tie-break produces identical selected candidate across repeated test runs."
+      ],
+      "passes": false,
+      "risk": "high",
+      "owner": "qa"
+    },
+    {
+      "id": "F038",
+      "category": "testing",
+      "description": "Add integration tests for /v1/geocode using mocked GeoNames responses, validating cache flow (KV then D1).",
+      "dependencies": ["F032", "F018", "F019"],
+      "steps": [
+        "First call returns provider-derived result and sets `cache.hit=false`.",
+        "Second call returns `cache.hit=true` from KV (simulate KV hit) and matches the first response payload.",
+        "If KV is cleared, verify D1 hit returns the same cached payload with `cache.hit=true`."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "qa"
+    },
+    {
+      "id": "F039",
+      "category": "testing",
+      "description": "Run staging smoke tests against live GeoNames for a small curated set of real inputs and record outputs for regression.",
+      "dependencies": ["F044", "F002"],
+      "steps": [
+        "Deploy to staging with real secrets and call /v1/geocode for at least 15 curated inputs; verify 200 responses and reasonable confidence values.",
+        "Include at least 3 ambiguous cases and verify ambiguous flag behavior matches the selected policy.",
+        "Store outputs as golden results for regression comparison (acknowledging provider data can change over time)."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "qa"
+    },
+    {
+      "id": "F040",
+      "category": "testing",
+      "description": "Validate security controls: API key auth, CORS allowlist, and rate limiting behavior.",
+      "dependencies": ["F009", "F010", "F012", "F032"],
+      "steps": [
+        "Verify unauthorized requests to /v1/geocode return 401 without CORS leakage for disallowed origins.",
+        "Verify allowed origin + valid API key succeeds; disallowed origin fails in browser context (CORS blocked).",
+        "Trigger rate limit and verify 429 with standard error JSON and no provider calls being made when already limited."
+      ],
+      "passes": false,
+      "risk": "high",
+      "owner": "security"
+    },
+    {
+      "id": "F041",
+      "category": "documentation",
+      "description": "Document API usage for Next.js integration (request examples, response fields, and rendering rules by granularity).",
+      "dependencies": ["F032", "F033"],
+      "steps": [
+        "Provide a minimal example of calling `POST /v1/geocode` from Next.js (server action or route handler) including required headers.",
+        "Document how to render markers for `city/region/country/multi` including multi-area disclaimer behavior.",
+        "Document caching expectations and that results become deterministic after first resolution due to D1+KV caching."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F042",
+      "category": "documentation",
+      "description": "Write operational runbook: secrets, environment variables, migrations, rate limiting setup, troubleshooting, and log/event interpretation.",
+      "dependencies": ["F006", "F007", "F012", "F031"],
+      "steps": [
+        "Document all required secrets/vars and where they are configured (Wrangler + Cloudflare dashboard).",
+        "Document migration application steps for D1 and how to verify table/index existence.",
+        "Document common failure modes (GeoNames timeouts, ambiguous results, country mismatch) and where to see evidence (logs/events)."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "devops"
+    },
+    {
+      "id": "F043",
+      "category": "release",
+      "description": "Create staging and production deployments with separate bindings/secrets and verify rollback procedure.",
+      "dependencies": ["F032", "F033", "F007", "F006"],
+      "steps": [
+        "Deploy to staging and verify /health and /v1/geocode work end-to-end with valid secrets and bindings.",
+        "Deploy to production and verify the same smoke tests pass with production allowlisted origins.",
+        "Document and validate rollback by deploying a known previous version and confirming service restoration."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "devops"
+    },
+    {
+      "id": "F044",
+      "category": "release",
+      "description": "Add CI checks (lint, typecheck, tests) and a gated deploy workflow for staging/prod.",
+      "dependencies": ["F035", "F036", "F037", "F038"],
+      "steps": [
+        "Verify CI runs lint + typecheck + unit/integration tests on pull requests.",
+        "Verify staging deploy runs only after checks pass and uses staging secrets/bindings.",
+        "Verify production deploy is gated (manual approval or protected branch) and uses production secrets/bindings."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "devops"
+    }
+  ]
+}
