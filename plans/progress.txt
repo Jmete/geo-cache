@@ -18,3 +18,13 @@
 - Set up project: package.json, tsconfig.json, eslint.config.js, vitest.config.ts
 - Type tests validate all shapes compile and are usable
 - Files: src/types/api.ts, src/types/index.ts, src/types/api.test.ts, package.json, tsconfig.json, eslint.config.js, vitest.config.ts
+
+## F004 - Error Response Format [COMPLETE]
+- Created src/errors/index.ts with error utilities
+- ErrorCode constants: INVALID_JSON, MISSING_TEXT, TEXT_TOO_LONG, TEXT_EMPTY, INVALID_REQUEST, MISSING_API_KEY, INVALID_API_KEY, ORIGIN_NOT_ALLOWED, METHOD_NOT_ALLOWED, RATE_LIMITED, INTERNAL_ERROR, PROVIDER_ERROR, PROVIDER_TIMEOUT
+- RETRYABLE_STATUS_CODES: [429, 502]; NON_RETRYABLE_STATUS_CODES: [400, 401, 403, 405, 500]
+- isRetryableStatus() and isNonRetryableStatus() for client classification
+- createErrorResponse() factory + pre-built error functions for each scenario
+- getHttpStatusForErrorCode() maps error codes to HTTP status
+- 42 tests covering structure, classification, mappings, security (no sensitive data leakage)
+- Files: src/errors/index.ts, src/errors/index.test.ts

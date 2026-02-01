@@ -67,7 +67,7 @@
         "Map at least: 400 invalid input, 401 missing/invalid API key, 403 origin not allowed, 405 wrong method, 429 rate limited, 502 provider failure, 500 internal error.",
         "Verify the client can distinguish retryable errors (429/502) from non-retryable errors (400/401/403/405)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
