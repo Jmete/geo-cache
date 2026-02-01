@@ -24,4 +24,5 @@ Keep changes small and focused: \
 - Prefer multiple small commits over one large commit \
 - Run feedback loops after each change, not at the end \
 Quality over speed. Small steps compound into big progress. \
+If a prd task requires manual human input such as configuring an online dashboard in cloudfalre, let me know the steps to complete it \
 If the PRD is complete, output <promise>COMPLETE</promise>."
