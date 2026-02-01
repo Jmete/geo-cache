@@ -28,3 +28,17 @@
 - getHttpStatusForErrorCode() maps error codes to HTTP status
 - 42 tests covering structure, classification, mappings, security (no sensitive data leakage)
 - Files: src/errors/index.ts, src/errors/index.test.ts
+
+## F001 - Geoname Usage [COMPLETE]
+- Geoname is in .env file as GEONAME_USERNAME
+
+## F005 - Deterministic Normalization Rules [COMPLETE]
+- Created src/normalize/index.ts with normalization utilities
+- normalizeToken(): casefold, remove diacritics (NFD), trim punctuation, collapse whitespace, preserve hyphens/apostrophes
+- generateNormalizedKey(): format `<countryIso2>|<admin1_norm>|<city_norm>|<multi_flag>`
+- parseNormalizedKey(), isValidNormalizedKey() for validation/debugging
+- Tie-break rules: score desc → population desc → providerId asc (deterministic)
+- compareCandidates(), sortCandidatesDeterministically(), isAmbiguousResult()
+- AMBIGUITY_THRESHOLD = 0.05 constant
+- 71 tests including all acceptance fixtures from F002
+- Files: src/normalize/index.ts, src/normalize/index.test.ts

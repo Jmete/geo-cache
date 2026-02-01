@@ -24,7 +24,7 @@
         "Document the expected daily/hourly request volume and confirm it is compatible with GeoNames limits for the MVP usage.",
         "If the quota/limits are insufficient, record the required mitigation (additional provider, stronger caching, batch, or throttling)."
       ],
-      "passes": false,
+      "passes": true,
       "notes": "If limits are too low, add a second provider or strengthen cache strategy before production rollout.",
       "risk": "medium",
       "owner": "fullstack"
@@ -81,7 +81,7 @@
         "Given inputs differing only in casing/whitespace/diacritics/punctuation, confirm the normalizedKey is identical.",
         "Document tie-break rules for candidates so the same best candidate is chosen deterministically when scores match closely."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },
