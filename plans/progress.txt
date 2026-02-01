@@ -58,3 +58,12 @@
 - MAX_PROVIDER_RESPONSE_LENGTH = 2048
 - 40 tests: schema helpers, type compatibility, migration structure validation
 - Files: migrations/0001_create_geocode_cache.sql, migrations/0002_create_geocode_events.sql, src/db/schema.ts, src/db/index.ts, src/db/schema.test.ts, src/db/migrations.test.ts
+
+## F007 - Wrangler Configuration [PARTIAL - NEEDS MANUAL SETUP]
+- Created wrangler.toml with D1 binding (DB), KV binding (GEO_KV), ALLOWED_ORIGINS env var
+- Configured staging and production environments with separate bindings
+- Created src/env.d.ts with TypeScript types for Env bindings
+- Added hono and wrangler dependencies
+- Added npm scripts: dev, deploy, deploy:staging, deploy:production, d1:migrate variants
+- MANUAL STEPS REQUIRED: See Cloudflare setup instructions below
+- Files: wrangler.toml, src/env.d.ts, package.json

@@ -1,0 +1,75 @@
+# Cloudflare Worker Configuration
+# See: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "geo-cache"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# Use Node.js compatibility for better library support
+node_compat = true
+
+# =============================================================================
+# Environment Variables (non-secret)
+# =============================================================================
+
+[vars]
+# Comma-separated list of allowed origins for CORS
+# Override per environment below
+ALLOWED_ORIGINS = "http://localhost:3000"
+
+# =============================================================================
+# D1 Database Binding
+# =============================================================================
+# After creating the database, replace DATABASE_ID with the actual ID
+
+[[d1_databases]]
+binding = "DB"
+database_name = "geo-cache-db"
+database_id = "YOUR_D1_DATABASE_ID"  # Replace after: wrangler d1 create geo-cache-db
+
+# =============================================================================
+# KV Namespace Binding (Hot Cache)
+# =============================================================================
+# After creating the namespace, replace the id with the actual ID
+
+[[kv_namespaces]]
+binding = "GEO_KV"
+id = "YOUR_KV_NAMESPACE_ID"  # Replace after: wrangler kv:namespace create GEO_KV
+
+# =============================================================================
+# Staging Environment
+# =============================================================================
+
+[env.staging]
+name = "geo-cache-staging"
+
+[env.staging.vars]
+ALLOWED_ORIGINS = "http://localhost:3000,https://staging.yourdomain.com"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "geo-cache-db-staging"
+database_id = "YOUR_STAGING_D1_DATABASE_ID"  # Replace with staging DB ID
+
+[[env.staging.kv_namespaces]]
+binding = "GEO_KV"
+id = "YOUR_STAGING_KV_NAMESPACE_ID"  # Replace with staging KV ID
+
+# =============================================================================
+# Production Environment
+# =============================================================================
+
+[env.production]
+name = "geo-cache-production"
+
+[env.production.vars]
+ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "geo-cache-db-production"
+database_id = "YOUR_PRODUCTION_D1_DATABASE_ID"  # Replace with production DB ID
+
+[[env.production.kv_namespaces]]
+binding = "GEO_KV"
+id = "YOUR_PRODUCTION_KV_NAMESPACE_ID"  # Replace with production KV ID
