@@ -1,0 +1,109 @@
+/**
+ * GeoNames Provider Tests (F021)
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { GeoNamesProvider } from './provider';
+import { ProviderTimeoutError } from './client';
+
+const mockFetch = vi.fn();
+
+describe('GeoNamesProvider (city search)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', mockFetch);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('builds city query with populated places and fuzzy matching', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 0,
+          geonames: [],
+        }),
+    });
+
+    const provider = new GeoNamesProvider();
+
+    await provider.search(
+      { city: 'Riyadh', countryIso2: 'SA', granularityHint: 'city' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(mockFetch).toHaveBeenCalledOnce();
+    const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
+    expect(calledUrl).toContain('secure.geonames.org/searchJSON');
+    expect(calledUrl).toContain('q=Riyadh');
+    expect(calledUrl).toContain('country=SA');
+    expect(calledUrl).toContain('featureClass=P');
+    expect(calledUrl).toContain('fuzzy=0.8');
+    expect(calledUrl).toContain('maxRows=10');
+
+    const fetchOptions = mockFetch.mock.calls[0]?.[1] as { signal?: AbortSignal };
+    expect(fetchOptions?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('maps GeoNames results to provider candidates with lat/lon and providerId', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 1,
+          geonames: [
+            {
+              geonameId: 108410,
+              countryCode: 'SA',
+              countryName: 'Saudi Arabia',
+              name: 'Riyadh',
+              lat: '24.7136',
+              lng: '46.6753',
+              fcl: 'P',
+              fcode: 'PPLC',
+              population: 4205961,
+              adminName1: 'Riyadh Region',
+            },
+          ],
+        }),
+    });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      { city: 'Riyadh', countryIso2: 'SA', granularityHint: 'city' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(result.candidates).toHaveLength(1);
+    const candidate = result.candidates[0];
+    if (!candidate) {
+      throw new Error('Expected candidate to be defined');
+    }
+    expect(candidate.providerId).toBe('108410');
+    expect(candidate.lat).toBeCloseTo(24.7136);
+    expect(candidate.lon).toBeCloseTo(46.6753);
+    expect(candidate.countryIso2).toBe('SA');
+    expect(candidate.countryName).toBe('Saudi Arabia');
+    expect(candidate.city).toBe('Riyadh');
+    expect(candidate.admin1).toBe('Riyadh Region');
+    expect(candidate.featureClass).toBe('P');
+    expect(candidate.featureCode).toBe('PPLC');
+  });
+
+  it('throws ProviderTimeoutError on abort', async () => {
+    const abortError = new Error('Aborted');
+    abortError.name = 'AbortError';
+    mockFetch.mockRejectedValueOnce(abortError);
+
+    const provider = new GeoNamesProvider();
+
+    await expect(
+      provider.search(
+        { city: 'Riyadh', countryIso2: 'SA', granularityHint: 'city' },
+        { timeout: 10, credentials: { username: 'testuser' } }
+      )
+    ).rejects.toThrow(ProviderTimeoutError);
+  });
+});

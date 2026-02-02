@@ -306,7 +306,7 @@
         "Verify the provider returns candidates with lat/lon and includes providerId (GeoNameId) when present.",
         "Verify provider fetch uses a strict timeout and returns a controlled error on timeout."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },

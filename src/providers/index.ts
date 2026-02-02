@@ -23,6 +23,8 @@ export {
   ProviderTimeoutError,
   ProviderFetchError,
   searchCountryPCLI,
+  searchCity,
+  GeoNamesProvider,
   type GeoNamesConfig,
   type GeoNamesSearchResult,
 } from './geonames';

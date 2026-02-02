@@ -7,6 +7,8 @@
 
 const GEONAMES_BASE_URL = 'https://secure.geonames.org/searchJSON';
 const DEFAULT_TIMEOUT_MS = 7000;
+const DEFAULT_CITY_MAX_ROWS = 10;
+const DEFAULT_CITY_FUZZY = 0.8;
 
 // =============================================================================
 // Types
@@ -33,7 +35,78 @@ export interface GeoNamesSearchResult {
 
 interface GeoNamesResponse {
   totalResultsCount: number;
-  geonames: GeoNamesSearchResult[];
+  geonames?: GeoNamesSearchResult[];
+}
+
+type GeoNamesParamValue = string | string[];
+type GeoNamesParams = Record<string, GeoNamesParamValue>;
+
+function buildGeoNamesUrl(params: GeoNamesParams, username: string): string {
+  const url = new URL(GEONAMES_BASE_URL);
+
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value)) {
+      for (const entry of value) {
+        url.searchParams.append(key, entry);
+      }
+    } else {
+      url.searchParams.set(key, value);
+    }
+  }
+
+  url.searchParams.set('username', username);
+
+  return url.toString();
+}
+
+function parseGeoNamesResults(data: unknown): GeoNamesSearchResult[] {
+  if (!data || typeof data !== 'object') {
+    return [];
+  }
+
+  const results = (data as GeoNamesResponse).geonames;
+  return Array.isArray(results) ? results : [];
+}
+
+async function fetchGeoNames(
+  params: GeoNamesParams,
+  config: GeoNamesConfig
+): Promise<GeoNamesSearchResult[]> {
+  const { username, timeout = DEFAULT_TIMEOUT_MS } = config;
+  const url = buildGeoNamesUrl(params, username);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new ProviderFetchError(`HTTP ${response.status}`);
+    }
+
+    const data = (await response.json()) as GeoNamesResponse;
+    return parseGeoNamesResults(data);
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new ProviderTimeoutError();
+    }
+
+    if (
+      error instanceof ProviderTimeoutError ||
+      error instanceof ProviderFetchError
+    ) {
+      throw error;
+    }
+
+    throw new ProviderFetchError(
+      error instanceof Error ? error.message : 'Unknown fetch error'
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // =============================================================================
@@ -87,53 +160,43 @@ export async function searchCountryPCLI(
   query: string,
   config: GeoNamesConfig
 ): Promise<GeoNamesSearchResult | null> {
-  const { username, timeout = DEFAULT_TIMEOUT_MS } = config;
+  const results = await fetchGeoNames(
+    {
+      q: query,
+      featureCode: 'PCLI',
+      maxRows: '1',
+    },
+    config
+  );
 
-  const url = new URL(GEONAMES_BASE_URL);
-  url.searchParams.set('q', query);
-  url.searchParams.set('featureCode', 'PCLI');
-  url.searchParams.set('maxRows', '1');
-  url.searchParams.set('username', username);
+  return results[0] ?? null;
+}
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+export interface GeoNamesCitySearchOptions {
+  maxRows?: number;
+  fuzzy?: number;
+}
 
-  try {
-    const response = await fetch(url.toString(), {
-      signal: controller.signal,
-    });
+/**
+ * Search for a populated place (city-level) using GeoNames.
+ */
+export async function searchCity(
+  city: string,
+  countryIso2: string,
+  config: GeoNamesConfig,
+  options: GeoNamesCitySearchOptions = {}
+): Promise<GeoNamesSearchResult[]> {
+  const { maxRows = DEFAULT_CITY_MAX_ROWS, fuzzy = DEFAULT_CITY_FUZZY } =
+    options;
 
-    if (!response.ok) {
-      throw new ProviderFetchError(`HTTP ${response.status}`);
-    }
-
-    const data = (await response.json()) as GeoNamesResponse;
-
-    // GeoNames returns empty array when no matches
-    if (!data.geonames || data.geonames.length === 0) {
-      return null;
-    }
-
-    return data.geonames[0] ?? null;
-  } catch (error) {
-    // Handle abort (timeout)
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new ProviderTimeoutError();
-    }
-
-    // Re-throw our custom errors
-    if (
-      error instanceof ProviderTimeoutError ||
-      error instanceof ProviderFetchError
-    ) {
-      throw error;
-    }
-
-    // Wrap unknown errors
-    throw new ProviderFetchError(
-      error instanceof Error ? error.message : 'Unknown fetch error'
-    );
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  return fetchGeoNames(
+    {
+      q: city,
+      country: countryIso2,
+      featureClass: 'P',
+      maxRows: String(maxRows),
+      fuzzy: String(fuzzy),
+    },
+    config
+  );
 }

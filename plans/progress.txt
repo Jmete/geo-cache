@@ -150,3 +150,9 @@
 - Tests cover D1 hit/miss, bbox/flags parsing, null-safe optional fields
 - Files: src/cache/d1.ts, src/cache/d1.test.ts, plans/prd.json
 - Notes: none
+
+## F021 - GeoNames City Provider [COMPLETE]
+- Completed: city-level GeoNames searchJSON query w/ populated place filter + fuzzy matching; strict timeout handling via AbortController
+- Decisions: featureClass=P, fuzzy=0.8, maxRows=10; skip candidates missing geonameId/lat/lon
+- Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/providers/geonames/index.ts, src/providers/index.ts, plans/prd.json
+- Notes: none

@@ -6,8 +6,11 @@
 
 export {
   searchCountryPCLI,
+  searchCity,
   ProviderTimeoutError,
   ProviderFetchError,
   type GeoNamesConfig,
   type GeoNamesSearchResult,
 } from './client';
+
+export { GeoNamesProvider } from './provider';
