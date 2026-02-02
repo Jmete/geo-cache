@@ -198,3 +198,9 @@
 - Decisions: treat granularityHint=multi same as country query to avoid city-level claims
 - Files: src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, plans/prd.json
 - Notes: none
+
+## F029 - D1 Upsert for geocode_cache [COMPLETE]
+- Completed: upsert geocode_cache with ON CONFLICT update + updated_at refresh; null-safe bbox/point storage; stable flags JSON
+- Decisions: stable sort flags keys for deterministic storage; update all columns except created_at on conflict to reflect latest canonical data
+- Files: src/cache/d1.ts, src/cache/d1.test.ts, src/db/schema.ts, src/db/schema.test.ts, plans/prd.json
+- Notes: none

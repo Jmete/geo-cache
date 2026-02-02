@@ -141,7 +141,14 @@ export function parseFlagsJson(flagsJson: string): GeocodeFlags {
  * Serialize flags to JSON for database storage
  */
 export function serializeFlagsJson(flags: GeocodeFlags): string {
-  return JSON.stringify(flags);
+  const sorted: Record<string, unknown> = {};
+  for (const key of Object.keys(flags).sort()) {
+    const value = (flags as Record<string, unknown>)[key];
+    if (value !== undefined) {
+      sorted[key] = value;
+    }
+  }
+  return JSON.stringify(sorted);
 }
 
 /**

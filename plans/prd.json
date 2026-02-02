@@ -418,7 +418,7 @@
         "On subsequent calls (same key) after a recompute, verify the existing row is updated (updated_at changes; created_at remains).",
         "Verify the unique constraint on input_norm_key prevents duplicates and the system still returns a single deterministic result."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "data"
     },

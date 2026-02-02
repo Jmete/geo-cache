@@ -87,6 +87,17 @@ describe('serializeFlagsJson', () => {
     const parsed = parseFlagsJson(serialized);
     expect(parsed).toEqual(flags);
   });
+
+  it('serializes flags with stable key order', () => {
+    const flags: GeocodeFlags = {
+      providerFallback: true,
+      ambiguous: true,
+      adminMismatch: true,
+    };
+    expect(serializeFlagsJson(flags)).toBe(
+      '{"adminMismatch":true,"ambiguous":true,"providerFallback":true}'
+    );
+  });
 });
 
 describe('rowToBbox', () => {
