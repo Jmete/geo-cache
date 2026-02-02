@@ -27,7 +27,18 @@ describe('authMiddleware', () => {
     const res = await app.fetch(req, baseEnv, ctx);
 
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ status: 'ok' });
+    const payload = (await res.json()) as {
+      status?: string;
+      uptimeMs?: number;
+      timestamp?: string;
+    };
+
+    expect(payload.status).toBe('ok');
+    expect(typeof payload.uptimeMs).toBe('number');
+    expect(payload.uptimeMs).toBeGreaterThanOrEqual(0);
+    expect(typeof payload.timestamp).toBe('string');
+    const timestamp = payload.timestamp ?? '';
+    expect(Number.isNaN(Date.parse(timestamp))).toBe(false);
   });
 
   it('rejects /v1/geocode without API key', async () => {

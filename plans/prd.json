@@ -432,7 +432,7 @@
         "On a miss that results in a successful provider lookup, verify a `miss` (or `resolved`) status is recorded with provider name.",
         "On provider errors/timeouts, verify an `error` status is recorded and provider_response is truncated to a safe length."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },

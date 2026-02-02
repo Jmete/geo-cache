@@ -252,3 +252,9 @@
 - Decisions: keep dev-only flag commented to avoid prod confusion
 - Files: wrangler.toml.example, plans/progress.txt
 - Notes: none
+
+## F033 - /health Endpoint Finalization [COMPLETE]
+- Task: F033 finalize /health; add uptime/timestamp payload for monitoring
+- Decisions: include uptimeMs + timestamp while keeping payload small; reuse existing CORS allowlist behavior
+- Files: src/index.ts, src/middleware/auth.test.ts, plans/prd.json, plans/progress.txt
+- Notes: none

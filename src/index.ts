@@ -21,6 +21,7 @@ const app = new Hono<{ Bindings: Env }>();
 const MAX_TEXT_LENGTH = 512;
 const BASE_ALLOWED_HOSTS = new Set(['api.geocache.dev']);
 const DEV_ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1']);
+const bootTime = Date.now();
 
 app.use('*', async (c, next) => {
   const hostname = new URL(c.req.url).hostname;
@@ -55,7 +56,11 @@ app.use('/v1/geocode', async (c, next) => {
 
 // GET /health - Health check endpoint (no auth required)
 app.get('/health', (c) => {
-  return c.json({ status: 'ok' });
+  return c.json({
+    status: 'ok',
+    uptimeMs: Math.max(0, Date.now() - bootTime),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // /v1/geocode - Geocoding endpoint
