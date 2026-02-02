@@ -278,7 +278,7 @@
         "Verify bbox and flags are correctly parsed from stored JSON strings (if stored as text).",
         "Verify missing optional fields in storage do not break response (null-safe mapping)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "data"
     },

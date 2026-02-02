@@ -144,3 +144,9 @@
 - Decisions: stableJsonStringify sorts object keys + omits undefined; write forces cache.hit=true before storing
 - Files: src/cache/kv.ts, src/cache/kv.test.ts, plans/prd.json
 - Notes: none
+
+## F019 - D1 Lookup Mapping [COMPLETE]
+- Implemented D1 cache lookup by input_norm_key with row->GeocodeResponse mapping; omit point/bbox when null; parse flags_json; cache.hit=true on hit
+- Tests cover D1 hit/miss, bbox/flags parsing, null-safe optional fields
+- Files: src/cache/d1.ts, src/cache/d1.test.ts, plans/prd.json
+- Notes: none
