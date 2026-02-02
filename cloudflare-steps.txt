@@ -8,6 +8,22 @@
 2. Authenticate with Cloudflare:
    wrangler login
 
+## Local Development (Wrangler dev)
+
+1. Create a `.dev.vars` file (gitignored) with local secrets:
+
+   API_KEY=your-dev-key
+   GEONAMES_USERNAME=your-geonames-user
+   ALLOW_LOCALHOST_HOSTS=true
+
+2. Start the worker:
+
+   wrangler dev
+
+3. Call the local endpoint (host header required unless ALLOW_LOCALHOST_HOSTS=true):
+
+   ./scripts/dev-geocode.sh --localhost "Riyadh, Saudi Arabia"
+
 
 ## Step 1: Create D1 Database
 

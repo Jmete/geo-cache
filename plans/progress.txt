@@ -240,3 +240,9 @@
 - Decisions: recommend .dev.vars for local secrets; keep localhost allow flag dev-only
 - Files: .env.example, README.md, plans/progress.txt
 - Notes: none
+
+## Dev Docs - Cloudflare steps aligned [NON-PRD]
+- Completed: added local dev section to cloudflare-steps.txt including .dev.vars and ALLOW_LOCALHOST_HOSTS
+- Decisions: emphasize dev-only localhost flag and helper script usage
+- Files: cloudflare-steps.txt, plans/progress.txt
+- Notes: none
