@@ -167,7 +167,26 @@ export class GeoNamesProvider implements Provider {
       const candidates = results
         .map((result) => mapCityCandidate(result, query.countryIso2))
         .filter((candidate): candidate is ProviderCandidate => candidate !== null);
-      return { candidates, usedFallback: false };
+
+      if (candidates.length > 0) {
+        return { candidates, usedFallback: false };
+      }
+
+      const fallbackResults = await searchCity(
+        query.city,
+        query.countryIso2,
+        geoNamesConfig,
+        { featureClass: null, fuzzy: 1 }
+      );
+      const fallbackCandidates = fallbackResults
+        .map((result) => mapCityCandidate(result, query.countryIso2))
+        .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+
+      if (fallbackCandidates.length > 0) {
+        return { candidates: fallbackCandidates, usedFallback: true };
+      }
+
+      return { candidates: [], usedFallback: false };
     }
 
     if (query.granularityHint === 'region' && query.admin1) {
@@ -179,7 +198,26 @@ export class GeoNamesProvider implements Provider {
       const candidates = results
         .map((result) => mapAdmin1Candidate(result, query.countryIso2))
         .filter((candidate): candidate is ProviderCandidate => candidate !== null);
-      return { candidates, usedFallback: false };
+
+      if (candidates.length > 0) {
+        return { candidates, usedFallback: false };
+      }
+
+      const fallbackResults = await searchAdmin1(
+        query.admin1,
+        query.countryIso2,
+        geoNamesConfig,
+        { featureCode: null }
+      );
+      const fallbackCandidates = fallbackResults
+        .map((result) => mapAdmin1Candidate(result, query.countryIso2))
+        .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+
+      if (fallbackCandidates.length > 0) {
+        return { candidates: fallbackCandidates, usedFallback: true };
+      }
+
+      return { candidates: [], usedFallback: false };
     }
 
     if (query.granularityHint === 'country') {

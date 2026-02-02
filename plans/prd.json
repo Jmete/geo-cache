@@ -390,7 +390,7 @@
         "If input admin1 exists and best candidate admin1 similarity is below threshold, verify `flags.adminMismatch=true`.",
         "Verify flags are persisted in cache responses (subsequent calls return the same flags)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },

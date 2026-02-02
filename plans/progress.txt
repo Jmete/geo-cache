@@ -186,3 +186,9 @@
 - Decisions: granularity derived from parsed hint with candidate fallback; displayName joins city/admin1/countryName (best available)
 - Files: src/canonical/index.ts, src/canonical/index.test.ts, plans/prd.json
 - Notes: none
+
+## F027 - Provider Fallback + Validation Flags [COMPLETE]
+- Task: fallback detection + adminMismatch/providerFallback flags
+- Decisions: GeoNames fallback when strict empty; city fallback drops featureClass + fuzzy=1; region fallback drops featureCode; adminMismatch threshold 0.6 using tokenSimilarity; flags built in helper for determinism
+- Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/flags/index.ts, src/flags/index.test.ts, plans/prd.json
+- Notes: none

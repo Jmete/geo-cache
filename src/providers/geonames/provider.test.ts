@@ -22,8 +22,20 @@ describe('GeoNamesProvider (city search)', () => {
       ok: true,
       json: () =>
         Promise.resolve({
-          totalResultsCount: 0,
-          geonames: [],
+          totalResultsCount: 1,
+          geonames: [
+            {
+              geonameId: 108410,
+              countryCode: 'SA',
+              countryName: 'Saudi Arabia',
+              name: 'Riyadh',
+              lat: '24.7136',
+              lng: '46.6753',
+              fcl: 'P',
+              fcode: 'PPLC',
+              adminName1: 'Riyadh Region',
+            },
+          ],
         }),
     });
 
@@ -45,6 +57,53 @@ describe('GeoNamesProvider (city search)', () => {
 
     const fetchOptions = mockFetch.mock.calls[0]?.[1] as { signal?: AbortSignal };
     expect(fetchOptions?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('falls back to relaxed city search when strict results are empty', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 1,
+            geonames: [
+              {
+                geonameId: 108410,
+                countryCode: 'SA',
+                countryName: 'Saudi Arabia',
+                name: 'Riyadh',
+                lat: '24.7136',
+                lng: '46.6753',
+                fcl: 'P',
+                fcode: 'PPLC',
+                adminName1: 'Riyadh Region',
+              },
+            ],
+          }),
+      });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      { city: 'Riyadh', countryIso2: 'SA', granularityHint: 'city' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    const strictUrl = mockFetch.mock.calls[0]?.[0] as string;
+    const fallbackUrl = mockFetch.mock.calls[1]?.[0] as string;
+    expect(strictUrl).toContain('featureClass=P');
+    expect(fallbackUrl).not.toContain('featureClass=P');
+    expect(fallbackUrl).toContain('fuzzy=1');
+    expect(result.usedFallback).toBe(true);
+    expect(result.candidates).toHaveLength(1);
   });
 
   it('maps GeoNames results to provider candidates with lat/lon and providerId', async () => {
@@ -122,8 +181,20 @@ describe('GeoNamesProvider (region search)', () => {
       ok: true,
       json: () =>
         Promise.resolve({
-          totalResultsCount: 0,
-          geonames: [],
+          totalResultsCount: 1,
+          geonames: [
+            {
+              geonameId: 108662,
+              countryCode: 'SA',
+              countryName: 'Saudi Arabia',
+              name: 'Riyadh Region',
+              lat: '23.9',
+              lng: '45.0',
+              fcl: 'A',
+              fcode: 'ADM1',
+              adminName1: 'Riyadh Region',
+            },
+          ],
         }),
     });
 
@@ -143,6 +214,52 @@ describe('GeoNamesProvider (region search)', () => {
     expect(calledUrl).toContain('featureCode=ADM1');
     expect(calledUrl).toContain('fuzzy=0.8');
     expect(calledUrl).toContain('maxRows=10');
+  });
+
+  it('falls back to relaxed ADM1 search when strict results are empty', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 1,
+            geonames: [
+              {
+                geonameId: 108662,
+                countryCode: 'SA',
+                countryName: 'Saudi Arabia',
+                name: 'Riyadh Region',
+                lat: '23.9',
+                lng: '45.0',
+                fcl: 'A',
+                fcode: 'ADM2',
+                adminName1: 'Riyadh Region',
+              },
+            ],
+          }),
+      });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      { admin1: 'Riyadh Region', countryIso2: 'SA', granularityHint: 'region' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    const strictUrl = mockFetch.mock.calls[0]?.[0] as string;
+    const fallbackUrl = mockFetch.mock.calls[1]?.[0] as string;
+    expect(strictUrl).toContain('featureCode=ADM1');
+    expect(fallbackUrl).not.toContain('featureCode=ADM1');
+    expect(result.usedFallback).toBe(true);
+    expect(result.candidates).toHaveLength(1);
   });
 
   it('maps ADM1 results to admin1 candidates without city', async () => {

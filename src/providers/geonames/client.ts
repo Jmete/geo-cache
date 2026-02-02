@@ -183,6 +183,7 @@ export async function searchCountryPCLI(
 export interface GeoNamesCitySearchOptions {
   maxRows?: number;
   fuzzy?: number;
+  featureClass?: string | null;
 }
 
 /**
@@ -194,24 +195,31 @@ export async function searchCity(
   config: GeoNamesConfig,
   options: GeoNamesCitySearchOptions = {}
 ): Promise<GeoNamesSearchResult[]> {
-  const { maxRows = DEFAULT_CITY_MAX_ROWS, fuzzy = DEFAULT_CITY_FUZZY } =
-    options;
+  const {
+    maxRows = DEFAULT_CITY_MAX_ROWS,
+    fuzzy = DEFAULT_CITY_FUZZY,
+    featureClass = 'P',
+  } = options;
 
-  return fetchGeoNames(
-    {
-      q: city,
-      country: countryIso2,
-      featureClass: 'P',
-      maxRows: String(maxRows),
-      fuzzy: String(fuzzy),
-    },
-    config
-  );
+  const params: GeoNamesParams = {
+    q: city,
+    country: countryIso2,
+    maxRows: String(maxRows),
+    fuzzy: String(fuzzy),
+  };
+
+  if (featureClass) {
+    params.featureClass = featureClass;
+  }
+
+  return fetchGeoNames(params, config);
 }
 
 export interface GeoNamesAdmin1SearchOptions {
   maxRows?: number;
   fuzzy?: number;
+  featureClass?: string | null;
+  featureCode?: string | null;
 }
 
 /**
@@ -223,18 +231,26 @@ export async function searchAdmin1(
   config: GeoNamesConfig,
   options: GeoNamesAdmin1SearchOptions = {}
 ): Promise<GeoNamesSearchResult[]> {
-  const { maxRows = DEFAULT_ADMIN1_MAX_ROWS, fuzzy = DEFAULT_ADMIN1_FUZZY } =
-    options;
+  const {
+    maxRows = DEFAULT_ADMIN1_MAX_ROWS,
+    fuzzy = DEFAULT_ADMIN1_FUZZY,
+    featureClass = 'A',
+    featureCode = 'ADM1',
+  } = options;
 
-  return fetchGeoNames(
-    {
-      q: admin1,
-      country: countryIso2,
-      featureClass: 'A',
-      featureCode: 'ADM1',
-      maxRows: String(maxRows),
-      fuzzy: String(fuzzy),
-    },
-    config
-  );
+  const params: GeoNamesParams = {
+    q: admin1,
+    country: countryIso2,
+    maxRows: String(maxRows),
+    fuzzy: String(fuzzy),
+  };
+
+  if (featureClass) {
+    params.featureClass = featureClass;
+  }
+  if (featureCode) {
+    params.featureCode = featureCode;
+  }
+
+  return fetchGeoNames(params, config);
 }
