@@ -97,4 +97,15 @@ describe('buildValidationFlags', () => {
 
     expect(flags.providerFallback).toBe(true);
   });
+
+  it('sets adminMismatch and providerFallback together when both apply', () => {
+    const flags = buildValidationFlags({
+      parsed: parsedWithAdmin,
+      bestCandidate: baseCandidate({ admin1: 'Eastern Province' }),
+      usedFallback: true,
+    });
+
+    expect(flags.adminMismatch).toBe(true);
+    expect(flags.providerFallback).toBe(true);
+  });
 });

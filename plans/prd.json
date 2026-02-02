@@ -546,7 +546,7 @@
         "Provide mocked candidates with country mismatch and verify they are rejected when input countryIso2 is known.",
         "Verify tie-break produces identical selected candidate across repeated test runs."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "high",
       "owner": "qa"
     },

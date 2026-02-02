@@ -276,3 +276,9 @@
 - Decisions: kept existing resolve-async tests; added separate fetch-stub tests to validate "no network" fast-path + timeout mapping via AbortError
 - Files: src/country/resolve-async.fetch.test.ts, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F037 - Scoring/Selection/Flags Unit Tests [COMPLETE]
+- Added deterministic tie-break test across input order permutations for selectBestCandidate
+- Added combined adminMismatch + providerFallback flag assertion
+- Files: src/selection/index.test.ts, src/flags/index.test.ts, plans/prd.json, plans/progress.txt
+- Notes: none

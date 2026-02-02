@@ -69,6 +69,33 @@ describe('F025 Step 2: deterministic tie-break selection', () => {
 
     expect(result.best?.providerId).toBe('a');
   });
+
+  it('returns the same best candidate regardless of input order', () => {
+    const candidates = [
+      createCandidate({ providerId: 'c', score: 0.8, population: 500 }),
+      createCandidate({ providerId: 'a', score: 0.8, population: 500 }),
+      createCandidate({ providerId: 'b', score: 0.8, population: 500 }),
+    ];
+
+    const orders = [
+      [0, 1, 2],
+      [1, 2, 0],
+      [2, 0, 1],
+      [2, 1, 0],
+    ];
+
+    for (const order of orders) {
+      const ordered = order.map((index) => {
+        const candidate = candidates[index];
+        if (!candidate) {
+          throw new Error(`Missing candidate at index ${index}`);
+        }
+        return candidate;
+      });
+      const result = selectBestCandidate(ordered, 'SA');
+      expect(result.best?.providerId).toBe('a');
+    }
+  });
 });
 
 describe('F025 Step 3: country mismatch rejection', () => {
