@@ -102,3 +102,9 @@
 - Decisions: enforce custom domain only (api.geocache.dev) to prevent workers.dev bypass; rate limit on api key for POST /v1/geocode only
 - Files: src/index.ts, src/env.d.ts, src/geocode.validation.test.ts, src/middleware/auth.test.ts, src/middleware/cors.test.ts, wrangler.toml.example
 - Notes: wrangler.toml is gitignored; ensure rate limiter binding is added there in each environment
+
+## F013 - Comma-Separated Token Parsing + Multi-Area Detection [COMPLETE]
+- Completed: parseLocation() splits comma-delimited text; detects multi-area; determines city/admin1/country
+- Decisions: 2-token disambiguation via region keywords (region/province/governorate/emirate/district/prefecture/state/oblast/county); preserves raw tokens w/o normalization (normalization done separately per F005)
+- Files: src/parser/index.ts, src/parser/index.test.ts, plans/prd.json
+- Notes: 31 tests cover PRD steps, fixture categories, edge cases (double commas, whitespace, diacritics, hyphens)

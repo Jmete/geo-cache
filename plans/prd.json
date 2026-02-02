@@ -194,7 +194,7 @@
         "Input 'Najran Region, Saudi Arabia' yields parsed admin1='Najran Region', countryText='Saudi Arabia', city unset, isMultiArea=false.",
         "Input containing 'Multiple Areas' (case-insensitive) yields isMultiArea=true and granularityHint='multi'."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
