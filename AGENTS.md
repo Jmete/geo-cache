@@ -25,6 +25,7 @@ Keep entries concise. Sacrifice grammar for the sake of concision. This file hel
 6.1 TypeScript: npm run typecheck (must pass with no errors)
 6.2 Tests: npm run test (must pass)
 6.3 Lint: npm run lint (must pass)
+6.4 Any user verification needs to be explained step by step what needs to be verified and how to do it
 Do NOT commit if any feedback loop fails. Fix issues first.
 
 7. Commit your changes and then git push.
