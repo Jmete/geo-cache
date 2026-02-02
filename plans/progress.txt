@@ -192,3 +192,9 @@
 - Decisions: GeoNames fallback when strict empty; city fallback drops featureClass + fuzzy=1; region fallback drops featureCode; adminMismatch threshold 0.6 using tokenSimilarity; flags built in helper for determinism
 - Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/flags/index.ts, src/flags/index.test.ts, plans/prd.json
 - Notes: none
+
+## F028 - Multi-Area Country Centroid Behavior [COMPLETE]
+- Completed: multi granularity uses country-level GeoNames PCLI lookup to return centroid point; canonical already omits city/admin1 for multi
+- Decisions: treat granularityHint=multi same as country query to avoid city-level claims
+- Files: src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, plans/prd.json
+- Notes: none

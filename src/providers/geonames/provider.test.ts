@@ -338,6 +338,50 @@ describe('GeoNamesProvider (country search)', () => {
     expect(calledUrl).toContain('maxRows=1');
   });
 
+  it('treats multi granularity as country lookup', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 1,
+          geonames: [
+            {
+              geonameId: 102358,
+              countryCode: 'SA',
+              countryName: 'Saudi Arabia',
+              name: 'Kingdom of Saudi Arabia',
+              lat: '25',
+              lng: '45',
+              fcl: 'A',
+              fcode: 'PCLI',
+            },
+          ],
+        }),
+    });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      { countryIso2: 'SA', granularityHint: 'multi' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(mockFetch).toHaveBeenCalledOnce();
+    const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
+    expect(calledUrl).toContain('secure.geonames.org/searchJSON');
+    expect(calledUrl).toContain('q=Saudi+Arabia');
+    expect(calledUrl).toContain('featureCode=PCLI');
+    expect(calledUrl).toContain('maxRows=1');
+    expect(result.candidates).toHaveLength(1);
+    const candidate = result.candidates[0];
+    if (!candidate) {
+      throw new Error('Expected candidate to be defined');
+    }
+    expect(candidate.lat).toBeCloseTo(25);
+    expect(candidate.lon).toBeCloseTo(45);
+    expect(candidate.city).toBeUndefined();
+    expect(candidate.admin1).toBeUndefined();
+  });
+
   it('maps country results with bbox when available', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,

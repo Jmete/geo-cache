@@ -404,7 +404,7 @@
         "Verify canonical.city and canonical.admin1 are unset for multi-area responses unless explicitly provided and validated (should be unset for MVP).",
         "Verify UI-facing fields do not imply a specific city location when multiArea is true."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
