@@ -228,3 +228,9 @@
 - Decisions: keep api.geocache.dev in allowlist; localhost is convenience for dev only
 - Files: src/index.ts, plans/progress.txt
 - Notes: host allowlist is not a security boundary; still rely on API key + CORS
+
+## Dev Tooling - Gate localhost host allowlist [NON-PRD]
+- Completed: localhost/127.0.0.1 host allowlist now requires ALLOW_LOCALHOST_HOSTS=true env var
+- Decisions: default remains api.geocache.dev only to avoid broad Host acceptance in prod
+- Files: src/index.ts, src/env.d.ts, plans/progress.txt
+- Notes: set ALLOW_LOCALHOST_HOSTS=true in .dev.vars for local testing

@@ -30,6 +30,9 @@ export interface Env {
   /** Comma-separated list of allowed CORS origins */
   ALLOWED_ORIGINS: string;
 
+  /** Enable localhost/127.0.0.1 host allowlist for local dev only */
+  ALLOW_LOCALHOST_HOSTS?: string;
+
   // =============================================================================
   // Secrets (set via wrangler secret put)
   // =============================================================================

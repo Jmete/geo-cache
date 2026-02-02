@@ -19,11 +19,17 @@ import { ProviderFetchError, ProviderTimeoutError } from './providers';
 
 const app = new Hono<{ Bindings: Env }>();
 const MAX_TEXT_LENGTH = 512;
-const ALLOWED_HOSTS = new Set(['api.geocache.dev', 'localhost', '127.0.0.1']);
+const BASE_ALLOWED_HOSTS = new Set(['api.geocache.dev']);
+const DEV_ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1']);
 
 app.use('*', async (c, next) => {
   const hostname = new URL(c.req.url).hostname;
-  if (!ALLOWED_HOSTS.has(hostname)) {
+  const allowLocalhost = c.env.ALLOW_LOCALHOST_HOSTS === 'true';
+  const isAllowed =
+    BASE_ALLOWED_HOSTS.has(hostname) ||
+    (allowLocalhost && DEV_ALLOWED_HOSTS.has(hostname));
+
+  if (!isAllowed) {
     return c.text('Not found', 404);
   }
   return next();
