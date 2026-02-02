@@ -9,6 +9,8 @@ const GEONAMES_BASE_URL = 'https://secure.geonames.org/searchJSON';
 const DEFAULT_TIMEOUT_MS = 7000;
 const DEFAULT_CITY_MAX_ROWS = 10;
 const DEFAULT_CITY_FUZZY = 0.8;
+const DEFAULT_ADMIN1_MAX_ROWS = 10;
+const DEFAULT_ADMIN1_FUZZY = 0.8;
 
 // =============================================================================
 // Types
@@ -194,6 +196,36 @@ export async function searchCity(
       q: city,
       country: countryIso2,
       featureClass: 'P',
+      maxRows: String(maxRows),
+      fuzzy: String(fuzzy),
+    },
+    config
+  );
+}
+
+export interface GeoNamesAdmin1SearchOptions {
+  maxRows?: number;
+  fuzzy?: number;
+}
+
+/**
+ * Search for an ADM1 region using GeoNames.
+ */
+export async function searchAdmin1(
+  admin1: string,
+  countryIso2: string,
+  config: GeoNamesConfig,
+  options: GeoNamesAdmin1SearchOptions = {}
+): Promise<GeoNamesSearchResult[]> {
+  const { maxRows = DEFAULT_ADMIN1_MAX_ROWS, fuzzy = DEFAULT_ADMIN1_FUZZY } =
+    options;
+
+  return fetchGeoNames(
+    {
+      q: admin1,
+      country: countryIso2,
+      featureClass: 'A',
+      featureCode: 'ADM1',
       maxRows: String(maxRows),
       fuzzy: String(fuzzy),
     },

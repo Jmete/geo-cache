@@ -7,6 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   searchCountryPCLI,
+  searchAdmin1,
   ProviderTimeoutError,
   ProviderFetchError,
 } from './client';
@@ -207,5 +208,39 @@ describe('searchCountryPCLI', () => {
       expect(error.name).toBe('ProviderFetchError');
       expect(error.message).toBe('Test message');
     });
+  });
+});
+
+describe('searchAdmin1', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', mockFetch);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('constructs URL with ADM1 filters and fuzzy matching', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 0,
+          geonames: [],
+        }),
+    });
+
+    await searchAdmin1('Riyadh Region', 'SA', { username: 'testuser' });
+
+    expect(mockFetch).toHaveBeenCalledOnce();
+    const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
+    expect(calledUrl).toContain('secure.geonames.org/searchJSON');
+    expect(calledUrl).toContain('q=Riyadh+Region');
+    expect(calledUrl).toContain('country=SA');
+    expect(calledUrl).toContain('featureClass=A');
+    expect(calledUrl).toContain('featureCode=ADM1');
+    expect(calledUrl).toContain('fuzzy=0.8');
+    expect(calledUrl).toContain('maxRows=10');
+    expect(calledUrl).toContain('username=testuser');
   });
 });

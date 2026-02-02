@@ -107,3 +107,82 @@ describe('GeoNamesProvider (city search)', () => {
     ).rejects.toThrow(ProviderTimeoutError);
   });
 });
+
+describe('GeoNamesProvider (region search)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', mockFetch);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('builds ADM1 query with feature class A and fuzzy matching', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 0,
+          geonames: [],
+        }),
+    });
+
+    const provider = new GeoNamesProvider();
+
+    await provider.search(
+      { admin1: 'Riyadh Region', countryIso2: 'SA', granularityHint: 'region' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(mockFetch).toHaveBeenCalledOnce();
+    const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
+    expect(calledUrl).toContain('secure.geonames.org/searchJSON');
+    expect(calledUrl).toContain('q=Riyadh+Region');
+    expect(calledUrl).toContain('country=SA');
+    expect(calledUrl).toContain('featureClass=A');
+    expect(calledUrl).toContain('featureCode=ADM1');
+    expect(calledUrl).toContain('fuzzy=0.8');
+    expect(calledUrl).toContain('maxRows=10');
+  });
+
+  it('maps ADM1 results to admin1 candidates without city', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 1,
+          geonames: [
+            {
+              geonameId: 108662,
+              countryCode: 'SA',
+              countryName: 'Saudi Arabia',
+              name: 'Riyadh Region',
+              lat: '23.9',
+              lng: '45.0',
+              fcl: 'A',
+              fcode: 'ADM1',
+              adminName1: 'Riyadh Region',
+            },
+          ],
+        }),
+    });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      { admin1: 'Riyadh Region', countryIso2: 'SA', granularityHint: 'region' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(result.candidates).toHaveLength(1);
+    const candidate = result.candidates[0];
+    if (!candidate) {
+      throw new Error('Expected candidate to be defined');
+    }
+    expect(candidate.providerId).toBe('108662');
+    expect(candidate.countryIso2).toBe('SA');
+    expect(candidate.admin1).toBe('Riyadh Region');
+    expect(candidate.city).toBeUndefined();
+    expect(candidate.featureClass).toBe('A');
+    expect(candidate.featureCode).toBe('ADM1');
+  });
+});

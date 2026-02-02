@@ -6,6 +6,7 @@
 
 export {
   searchCountryPCLI,
+  searchAdmin1,
   searchCity,
   ProviderTimeoutError,
   ProviderFetchError,

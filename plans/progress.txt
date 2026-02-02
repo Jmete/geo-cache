@@ -156,3 +156,9 @@
 - Decisions: featureClass=P, fuzzy=0.8, maxRows=10; skip candidates missing geonameId/lat/lon
 - Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/providers/geonames/index.ts, src/providers/index.ts, plans/prd.json
 - Notes: none
+
+## F022 - GeoNames Region Provider (ADM1) [COMPLETE]
+- Completed: ADM1 region search using featureClass=A + featureCode=ADM1 + fuzzy; provider handles admin1 queries
+- Decisions: split base/city/admin1 mapping to avoid city field for region results; admin1 uses adminName1 fallback to name
+- Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/index.ts, src/providers/geonames/client.test.ts, src/providers/geonames/provider.test.ts, plans/prd.json
+- Notes: none

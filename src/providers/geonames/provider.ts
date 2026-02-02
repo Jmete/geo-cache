@@ -1,7 +1,7 @@
 /**
- * GeoNames Provider (F021)
+ * GeoNames Provider (F021/F022)
  *
- * Implements city-level GeoNames search using populated place filters.
+ * Implements city-level and ADM1 region-level GeoNames search.
  */
 
 import type {
@@ -13,6 +13,7 @@ import type {
 import type { ProviderCandidate } from '../../types/api';
 import {
   ProviderFetchError,
+  searchAdmin1,
   searchCity,
   type GeoNamesConfig,
   type GeoNamesSearchResult,
@@ -30,7 +31,7 @@ function toGeoNamesConfig(config: ProviderConfig): GeoNamesConfig {
   };
 }
 
-function mapGeoNamesCandidate(
+function mapBaseCandidate(
   result: GeoNamesSearchResult,
   fallbackCountryIso2: string
 ): ProviderCandidate | null {
@@ -47,8 +48,6 @@ function mapGeoNamesCandidate(
 
   const countryIso2 = (result.countryCode?.trim() || fallbackCountryIso2).toUpperCase();
   const countryName = result.countryName?.trim() || countryIso2;
-  const city = result.name?.trim();
-  const admin1 = result.adminName1?.trim();
 
   const candidate: ProviderCandidate = {
     providerId: String(result.geonameId),
@@ -57,14 +56,6 @@ function mapGeoNamesCandidate(
     countryIso2,
     countryName,
   };
-
-  if (admin1) {
-    candidate.admin1 = admin1;
-  }
-
-  if (city) {
-    candidate.city = city;
-  }
 
   if (result.fcl) {
     candidate.featureClass = result.fcl;
@@ -81,6 +72,46 @@ function mapGeoNamesCandidate(
   return candidate;
 }
 
+function mapCityCandidate(
+  result: GeoNamesSearchResult,
+  fallbackCountryIso2: string
+): ProviderCandidate | null {
+  const candidate = mapBaseCandidate(result, fallbackCountryIso2);
+  if (!candidate) {
+    return null;
+  }
+
+  const city = result.name?.trim();
+  const admin1 = result.adminName1?.trim();
+
+  if (admin1) {
+    candidate.admin1 = admin1;
+  }
+
+  if (city) {
+    candidate.city = city;
+  }
+
+  return candidate;
+}
+
+function mapAdmin1Candidate(
+  result: GeoNamesSearchResult,
+  fallbackCountryIso2: string
+): ProviderCandidate | null {
+  const candidate = mapBaseCandidate(result, fallbackCountryIso2);
+  if (!candidate) {
+    return null;
+  }
+
+  const admin1 = result.adminName1?.trim() || result.name?.trim();
+  if (admin1) {
+    candidate.admin1 = admin1;
+  }
+
+  return candidate;
+}
+
 export class GeoNamesProvider implements Provider {
   readonly name = 'geonames';
 
@@ -88,16 +119,31 @@ export class GeoNamesProvider implements Provider {
     query: ProviderQuery,
     config: ProviderConfig
   ): Promise<ProviderSearchResult> {
-    if (!query.city || query.granularityHint !== 'city') {
-      return { candidates: [], usedFallback: false };
+    const geoNamesConfig = toGeoNamesConfig(config);
+    if (query.granularityHint === 'city' && query.city) {
+      const results = await searchCity(
+        query.city,
+        query.countryIso2,
+        geoNamesConfig
+      );
+      const candidates = results
+        .map((result) => mapCityCandidate(result, query.countryIso2))
+        .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+      return { candidates, usedFallback: false };
     }
 
-    const geoNamesConfig = toGeoNamesConfig(config);
-    const results = await searchCity(query.city, query.countryIso2, geoNamesConfig);
-    const candidates = results
-      .map((result) => mapGeoNamesCandidate(result, query.countryIso2))
-      .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+    if (query.granularityHint === 'region' && query.admin1) {
+      const results = await searchAdmin1(
+        query.admin1,
+        query.countryIso2,
+        geoNamesConfig
+      );
+      const candidates = results
+        .map((result) => mapAdmin1Candidate(result, query.countryIso2))
+        .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+      return { candidates, usedFallback: false };
+    }
 
-    return { candidates, usedFallback: false };
+    return { candidates: [], usedFallback: false };
   }
 }

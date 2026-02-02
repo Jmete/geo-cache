@@ -320,7 +320,7 @@
         "Verify returned candidates include admin1 and countryIso2 where available.",
         "Verify empty results are handled gracefully (no exception) and are eligible for fallback behavior."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },
