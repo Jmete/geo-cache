@@ -532,7 +532,7 @@
         "Verify unknown country name triggers a mocked GeoNames call and resolves ISO2 when mock response is valid.",
         "Verify provider timeout mock results in a controlled error outcome."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "qa"
     },

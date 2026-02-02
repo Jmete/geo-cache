@@ -270,3 +270,9 @@
 - Decisions: treat country-first 2-token input as country-only; updated RC006 expected to city due to emirate/city ambiguity + keyword-based parser
 - Files: src/parser/index.ts, fixtures/location-strings.json, src/fixtures/location-fixtures.test.ts, plans/prd.json
 - Notes: negative token tests already covered in parser tests; no blockers
+
+## F036 - Country Resolution Tests [COMPLETE]
+- Completed: added fetch-backed unit tests for async country resolution + GeoNames PCLI fallback (mocked fetch)
+- Decisions: kept existing resolve-async tests; added separate fetch-stub tests to validate "no network" fast-path + timeout mapping via AbortError
+- Files: src/country/resolve-async.fetch.test.ts, plans/prd.json, plans/progress.txt
+- Notes: none
