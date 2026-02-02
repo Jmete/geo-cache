@@ -28,7 +28,7 @@ Keep entries concise. Sacrifice grammar for the sake of concision. This file hel
 6.4 Any user verification needs to be explained step by step what needs to be verified and how to do it
 Do NOT commit if any feedback loop fails. Fix issues first.
 
-7. Commit your changes and then git push.
+7. Commit your changes.
 
 # Important Notes
 - ONLY DO ONE TASK AT A TIME.
