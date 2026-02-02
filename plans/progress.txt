@@ -180,3 +180,9 @@
 - Decisions: ambiguous confidence = average of top two scores to reduce confidence deterministically
 - Files: src/selection/index.ts, src/selection/index.test.ts, plans/prd.json
 - Notes: none
+
+## F026 - Canonical Fields + Granularity [COMPLETE]
+- Completed: canonical builder computes granularity, canonical fields, displayName; multi-area flag set
+- Decisions: granularity derived from parsed hint with candidate fallback; displayName joins city/admin1/countryName (best available)
+- Files: src/canonical/index.ts, src/canonical/index.test.ts, plans/prd.json
+- Notes: none

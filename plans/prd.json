@@ -376,7 +376,7 @@
         "Country-only input yields `granularity='country'` and canonical includes countryIso2; multi-area yields `granularity='multi'` and sets `flags.multiArea=true`.",
         "Verify displayName is stable and consistent (e.g., 'City, Region, Country' or best available combination)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
