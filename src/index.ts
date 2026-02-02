@@ -148,6 +148,8 @@ app.all('/v1/geocode', async (c) => {
       db: c.env.DB,
       geonamesUsername: c.env.GEONAMES_USERNAME,
       logger,
+      requestId: c.get('requestId'),
+      logHitEvents: c.env.LOG_GEOCODE_HITS === 'true',
     });
     return c.json(response, 200);
   } catch (error) {

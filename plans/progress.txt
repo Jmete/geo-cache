@@ -282,3 +282,9 @@
 - Added combined adminMismatch + providerFallback flag assertion
 - Files: src/selection/index.test.ts, src/flags/index.test.ts, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F030 - Geocode Event Logging to D1 [COMPLETE]
+- Task: record geocode_events for resolved/ambiguous/error; optional hit logging when LOG_GEOCODE_HITS=true
+- Decisions: log single event per request; status=resolved unless flags.ambiguous then ambiguous; provider errors log error w/ truncated summary; event failures never break response
+- Files: src/events/index.ts, src/events/index.test.ts, src/geocode/index.ts, src/geocode/index.test.ts, src/index.ts, src/env.d.ts, wrangler.toml.example, plans/prd.json
+- Notes: hit events disabled by default; enable via LOG_GEOCODE_HITS

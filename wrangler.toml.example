@@ -14,6 +14,8 @@ compatibility_flags = ["nodejs_compat"]
 ALLOWED_ORIGINS = "http://localhost:3000,https://domain.com,https://www.domain.com"
 # Local dev only: enable localhost Host header acceptance
 # ALLOW_LOCALHOST_HOSTS = "true"
+# Optional: log cache hit events to D1
+# LOG_GEOCODE_HITS = "true"
 
 # =============================================================================
 # D1 Database Binding

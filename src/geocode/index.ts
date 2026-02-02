@@ -3,6 +3,9 @@ import { generateCacheKeyAsync } from '../cache-key';
 import { readGeocodeFromD1, upsertGeocodeToD1 } from '../cache/d1';
 import { readGeocodeFromKv, writeGeocodeToKv } from '../cache/kv';
 import { getCountryName } from '../country';
+import type { EventStatus } from '../db/schema';
+import type { GeocodeEventPayload } from '../events';
+import { recordGeocodeEvent } from '../events';
 import { buildValidationFlags } from '../flags';
 import {
   GeoNamesProvider,
@@ -34,6 +37,8 @@ export interface ResolveGeocodeDependencies {
   timeoutMs?: number;
   providers?: Provider[];
   logger?: Logger;
+  requestId?: string;
+  logHitEvents?: boolean;
 }
 
 function cleanToken(value: string | null | undefined): string | undefined {
@@ -222,6 +227,21 @@ function buildResponseFromCandidate(params: {
   return response;
 }
 
+async function recordEventSafely(
+  db: D1Database,
+  logger: Logger | undefined,
+  payload: GeocodeEventPayload
+): Promise<void> {
+  try {
+    await recordGeocodeEvent(db, payload);
+  } catch (error) {
+    logger?.warn('geocode.event_error', {
+      status: payload.status,
+      errorType: error instanceof Error ? error.name : 'UnknownError',
+    });
+  }
+}
+
 export async function resolveGeocode(
   text: string,
   deps: ResolveGeocodeDependencies
@@ -229,6 +249,8 @@ export async function resolveGeocode(
   const { kv, db, geonamesUsername, logger } = deps;
   const timeoutMs = deps.timeoutMs ?? DEFAULT_PROVIDER_TIMEOUT_MS;
   const providers = deps.providers ?? PROVIDERS;
+  const requestId = deps.requestId ?? null;
+  const logHitEvents = deps.logHitEvents ?? false;
 
   const cacheKey = await generateCacheKeyAsync(text, {
     geonamesUsername,
@@ -238,13 +260,35 @@ export async function resolveGeocode(
   const kvHit = await readGeocodeFromKv(kv, cacheKey.key);
   if (kvHit && kvHit.normalizedKey === cacheKey.key) {
     logger?.info('geocode.cache_hit', { cache: 'kv' });
+    if (logHitEvents) {
+      await recordEventSafely(db, logger, {
+        inputRaw: text,
+        normalizedKey: cacheKey.key,
+        status: 'hit',
+        provider: kvHit.provider,
+        providerResponse: { cache: 'kv' },
+        requestId,
+      });
+    }
     return kvHit;
   }
 
   const d1Hit = await readGeocodeFromD1(db, cacheKey.key);
   if (d1Hit && d1Hit.normalizedKey === cacheKey.key) {
     logger?.info('geocode.cache_hit', { cache: 'd1' });
-    await writeGeocodeToKv(kv, cacheKey.key, d1Hit);
+    await Promise.all([
+      writeGeocodeToKv(kv, cacheKey.key, d1Hit),
+      logHitEvents
+        ? recordEventSafely(db, logger, {
+            inputRaw: text,
+            normalizedKey: cacheKey.key,
+            status: 'hit',
+            provider: d1Hit.provider,
+            providerResponse: { cache: 'd1' },
+            requestId,
+          })
+        : Promise.resolve(),
+    ]);
     return d1Hit;
   }
 
@@ -268,6 +312,14 @@ export async function resolveGeocode(
     await Promise.all([
       upsertGeocodeToD1(db, fallback, null),
       writeGeocodeToKv(kv, cacheKey.key, fallback),
+      recordEventSafely(db, logger, {
+        inputRaw: text,
+        normalizedKey: cacheKey.key,
+        status: 'ambiguous',
+        provider: providerName,
+        providerResponse: { reason: 'country_unresolved' },
+        requestId,
+      }),
     ]);
 
     return fallback;
@@ -295,6 +347,17 @@ export async function resolveGeocode(
       durationMs: providerDurationMs,
       errorType,
       errorCount: pipelineResult.errors.length,
+    });
+    await recordEventSafely(db, logger, {
+      inputRaw: text,
+      normalizedKey: cacheKey.key,
+      status: 'error',
+      provider,
+      providerResponse: {
+        errors: pipelineResult.errors,
+        hadTimeout: pipelineResult.hadTimeout,
+      },
+      requestId,
     });
     if (pipelineResult.hadTimeout) {
       throw new ProviderTimeoutError();
@@ -340,6 +403,14 @@ export async function resolveGeocode(
     await Promise.all([
       upsertGeocodeToD1(db, fallback, null),
       writeGeocodeToKv(kv, cacheKey.key, fallback),
+      recordEventSafely(db, logger, {
+        inputRaw: text,
+        normalizedKey: cacheKey.key,
+        status: 'ambiguous',
+        provider: resolvedProviderName,
+        providerResponse: { reason: 'no_candidates', usedFallback },
+        requestId,
+      }),
     ]);
 
     return fallback;
@@ -372,6 +443,14 @@ export async function resolveGeocode(
     await Promise.all([
       upsertGeocodeToD1(db, fallback, null),
       writeGeocodeToKv(kv, cacheKey.key, fallback),
+      recordEventSafely(db, logger, {
+        inputRaw: text,
+        normalizedKey: cacheKey.key,
+        status: 'ambiguous',
+        provider: resolvedProviderName,
+        providerResponse: { reason: 'selection_failed', usedFallback },
+        requestId,
+      }),
     ]);
 
     return fallback;
@@ -388,9 +467,26 @@ export async function resolveGeocode(
     provider: resolvedProviderName,
   });
 
+  const eventStatus: EventStatus =
+    response.flags?.ambiguous ? 'ambiguous' : 'resolved';
+
   await Promise.all([
     upsertGeocodeToD1(db, response, selection.best.providerId),
     writeGeocodeToKv(kv, cacheKey.key, response),
+    recordEventSafely(db, logger, {
+      inputRaw: text,
+      normalizedKey: cacheKey.key,
+      status: eventStatus,
+      provider: resolvedProviderName,
+      providerResponse: {
+        candidates: candidates.length,
+        usedFallback,
+        hadTimeout,
+        hadError,
+        ambiguous: response.flags?.ambiguous ?? false,
+      },
+      requestId,
+    }),
   ]);
 
   return response;

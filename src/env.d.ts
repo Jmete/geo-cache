@@ -33,6 +33,9 @@ export interface Env {
   /** Enable localhost/127.0.0.1 host allowlist for local dev only */
   ALLOW_LOCALHOST_HOSTS?: string;
 
+  /** Log cache hit events to D1 when true */
+  LOG_GEOCODE_HITS?: string;
+
   // =============================================================================
   // Secrets (set via wrangler secret put)
   // =============================================================================

@@ -180,7 +180,7 @@ describe('resolveGeocode', () => {
     expect(response.provider).toBe('geonames');
     expect(response.confidence).toBeGreaterThanOrEqual(0);
     expect(response.confidence).toBeLessThanOrEqual(1);
-    expect(d1Captured.insertCount).toBe(1);
+    expect(d1Captured.insertCount).toBe(2);
     expect(kvCaptured.lastPut?.key).toBe(response.normalizedKey);
   });
 
@@ -205,7 +205,7 @@ describe('resolveGeocode', () => {
       } as Response);
 
     const { kv } = createMockKv();
-    const { db } = createMockD1(new Map());
+    const { db, captured: d1Captured } = createMockD1(new Map());
 
     const response = await resolveGeocode('Riyadh, Saudi Arabia', {
       kv,
@@ -216,5 +216,6 @@ describe('resolveGeocode', () => {
     expect(response.cache.hit).toBe(false);
     expect(response.flags.ambiguous).toBe(true);
     expect(response.confidence).toBeLessThan(0.2);
+    expect(d1Captured.insertCount).toBe(2);
   });
 });
