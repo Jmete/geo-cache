@@ -770,7 +770,7 @@
         "Verify deploy runs only after checks pass.",
         "Verify deploy uses the correct secrets and bindings."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "devops"
     }

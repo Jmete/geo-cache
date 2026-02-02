@@ -310,3 +310,9 @@
 - Decisions: runbook in docs/runbook.md; reference worker rate limiting config; note LOG_GEOCODE_HITS behavior
 - Files: docs/runbook.md, README.md, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F044 - CI Checks + Deploy Workflow [COMPLETE]
+- Task: add GitHub Actions CI (lint/typecheck/tests) + deploy workflow gated on CI success
+- Decisions: deploy via workflow_run; write wrangler.toml from GitHub secrets to avoid committing config; required secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, D1_DATABASE_ID, D1_DATABASE_NAME, KV_NAMESPACE_ID, KV_PREVIEW_ID, RATE_LIMIT_NAMESPACE_ID, ALLOWED_ORIGINS (optional ALLOW_LOCALHOST_HOSTS, LOG_GEOCODE_HITS)
+- Files: .github/workflows/ci.yml, .github/workflows/deploy.yml, plans/prd.json, plans/progress.txt
+- Notes: set GitHub secrets before first deploy; wrangler.toml remains gitignored
