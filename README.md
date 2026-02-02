@@ -5,6 +5,7 @@ Cloudflare Worker geocoding API backed by GeoNames with D1 + KV caching.
 Docs:
 - `docs/api.md` - v1 API usage, response fields, and Next.js examples
 - `docs/runbook.md` - operational setup, migrations, rate limiting, troubleshooting
+- `docs/performance.md` - baseline performance targets and validation steps
 
 ## Local development
 
