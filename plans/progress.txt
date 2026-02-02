@@ -77,3 +77,4 @@
 - TypeScript compiles cleanly with strict mode
 - Deployed and verified working on Cloudflare Workers
 - Files: src/index.ts
+- Important Note: We are using Wrangler V4: https://developers.cloudflare.com/workers/wrangler/migration/update-v3-to-v4/
