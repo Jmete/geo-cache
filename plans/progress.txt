@@ -234,3 +234,9 @@
 - Decisions: default remains api.geocache.dev only to avoid broad Host acceptance in prod
 - Files: src/index.ts, src/env.d.ts, plans/progress.txt
 - Notes: set ALLOW_LOCALHOST_HOSTS=true in .dev.vars for local testing
+
+## Dev Docs - Localhost env + README [NON-PRD]
+- Completed: updated .env.example with ALLOW_LOCALHOST_HOSTS + created README.md with local dev steps
+- Decisions: recommend .dev.vars for local secrets; keep localhost allow flag dev-only
+- Files: .env.example, README.md, plans/progress.txt
+- Notes: none
