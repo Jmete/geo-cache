@@ -250,7 +250,7 @@
         "Input 'Eastern Province, Saudi Arabia' produces normalizedKey 'SA|eastern province||'.",
         "Input 'Multiple Areas, Saudi Arabia' produces normalizedKey 'SA|||multi'."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
