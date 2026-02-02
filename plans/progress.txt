@@ -316,3 +316,10 @@
 - Decisions: deploy via workflow_run; write wrangler.toml from GitHub secrets to avoid committing config; required secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, D1_DATABASE_ID, D1_DATABASE_NAME, KV_NAMESPACE_ID, KV_PREVIEW_ID, RATE_LIMIT_NAMESPACE_ID, ALLOWED_ORIGINS (optional ALLOW_LOCALHOST_HOSTS, LOG_GEOCODE_HITS)
 - Files: .github/workflows/ci.yml, .github/workflows/deploy.yml, plans/prd.json, plans/progress.txt
 - Notes: set GitHub secrets before first deploy; wrangler.toml remains gitignored
+
+## Dev Tooling - Perf script pacing + inputs file [NON-PRD]
+- Added --pace-ms to scripts/perf-geocode.mjs for rate-limit friendly runs
+- Added --inputs-file to rotate inputs from a file; ignores blank/comment lines
+- Documented pacing + inputs-file usage in docs/performance.md
+- Files: scripts/perf-geocode.mjs, docs/performance.md, plans/progress.txt
+- Notes: none

@@ -40,6 +40,7 @@ API_KEY=your-key node scripts/perf-geocode.mjs \
 ```
 
 The script prints p50/p95/p99, cache hit counts, and the normalized key.
+Use `--pace-ms` if you are close to rate limits.
 
 ### 3) KV hit validation
 
@@ -68,6 +69,36 @@ wrangler d1 execute <DB_NAME> --remote \
 2) Run the script again and confirm `cache.hit=false` and a
    `geocode.provider_call` log entry.
 3) Record the p95. Confirm requests are bounded by the GeoNames timeout (7s).
+
+## Rate-limit friendly runs
+
+If your rate limit is 50 requests per 10 seconds, add pacing:
+```
+API_KEY=your-key node scripts/perf-geocode.mjs \
+  --url https://api.example.com/v1/geocode \
+  --origin https://app.example.com \
+  --text "Riyadh, Saudi Arabia" \
+  --runs 50 \
+  --warmup 1 \
+  --concurrency 1 \
+  --pace-ms 200
+```
+
+## Cold provider runs with multiple inputs
+
+To avoid cache deletes, provide a file of unique inputs:
+```
+API_KEY=your-key node scripts/perf-geocode.mjs \
+  --url https://api.example.com/v1/geocode \
+  --origin https://app.example.com \
+  --inputs-file inputs.txt \
+  --runs 15 \
+  --warmup 0 \
+  --concurrency 1 \
+  --pace-ms 200
+```
+Each non-empty line in the file is treated as one input; lines starting with `#`
+are ignored.
 
 ## Results log (fill in)
 
