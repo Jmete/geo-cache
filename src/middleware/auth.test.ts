@@ -7,6 +7,9 @@ const baseEnv: Env = {
   ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
   API_KEY: 'test-api-key',
   GEONAMES_USERNAME: 'test-geonames',
+  GEOCODE_RATE_LIMITER: {
+    limit: async () => ({ success: true }),
+  },
   DB: {} as D1Database,
   GEO_KV: {} as KVNamespace,
 };
@@ -19,7 +22,7 @@ const ctx: ExecutionContext = {
 
 describe('authMiddleware', () => {
   it('allows /health without API key', async () => {
-    const req = new Request('https://worker.example/health', { method: 'GET' });
+    const req = new Request('https://api.geocache.dev/health', { method: 'GET' });
 
     const res = await app.fetch(req, baseEnv, ctx);
 
@@ -28,7 +31,7 @@ describe('authMiddleware', () => {
   });
 
   it('rejects /v1/geocode without API key', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +52,7 @@ describe('authMiddleware', () => {
   });
 
   it('rejects /v1/geocode with invalid API key', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -71,7 +74,7 @@ describe('authMiddleware', () => {
   });
 
   it('allows /v1/geocode with valid API key', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

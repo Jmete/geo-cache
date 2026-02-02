@@ -6,6 +6,7 @@ import {
   invalidRequestError,
   methodNotAllowedError,
   missingTextError,
+  rateLimitedError,
   textTooLongError,
 } from './errors';
 import { authMiddleware } from './middleware/auth';
@@ -13,9 +14,33 @@ import { corsMiddleware } from './middleware/cors';
 
 const app = new Hono<{ Bindings: Env }>();
 const MAX_TEXT_LENGTH = 512;
+const ALLOWED_HOSTS = new Set(['api.geocache.dev']);
 
+app.use('*', async (c, next) => {
+  const hostname = new URL(c.req.url).hostname;
+  if (!ALLOWED_HOSTS.has(hostname)) {
+    return c.text('Not found', 404);
+  }
+  return next();
+});
 app.use('*', corsMiddleware);
 app.use('/v1/*', authMiddleware);
+app.use('/v1/geocode', async (c, next) => {
+  if (c.req.method !== 'POST') {
+    return next();
+  }
+
+  const apiKey = c.req.header('x-api-key')?.trim();
+  if (apiKey) {
+    const key = `${apiKey}:POST:/v1/geocode`;
+    const { success } = await c.env.GEOCODE_RATE_LIMITER.limit({ key });
+    if (!success) {
+      return c.json(rateLimitedError(), 429);
+    }
+  }
+
+  return next();
+});
 
 // GET /health - Health check endpoint (no auth required)
 app.get('/health', (c) => {

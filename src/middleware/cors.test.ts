@@ -7,6 +7,9 @@ const baseEnv: Env = {
   ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
   API_KEY: 'test-api-key',
   GEONAMES_USERNAME: 'test-geonames',
+  GEOCODE_RATE_LIMITER: {
+    limit: async () => ({ success: true }),
+  },
   DB: {} as D1Database,
   GEO_KV: {} as KVNamespace,
 };
@@ -19,7 +22,7 @@ const ctx: ExecutionContext = {
 
 describe('corsMiddleware', () => {
   it('allows preflight for allowed origin', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'OPTIONS',
       headers: {
         Origin: 'https://allowed.example',
@@ -36,7 +39,7 @@ describe('corsMiddleware', () => {
   });
 
   it('rejects preflight for disallowed origin', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'OPTIONS',
       headers: {
         Origin: 'https://evil.example',
@@ -51,7 +54,7 @@ describe('corsMiddleware', () => {
   });
 
   it('sets CORS headers for allowed origin on normal requests', async () => {
-    const req = new Request('https://worker.example/health', {
+    const req = new Request('https://api.geocache.dev/health', {
       method: 'GET',
       headers: {
         Origin: 'https://allowed.example',
@@ -65,7 +68,7 @@ describe('corsMiddleware', () => {
   });
 
   it('rejects disallowed origin without CORS headers', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'POST',
       headers: {
         Origin: 'https://evil.example',
@@ -88,7 +91,7 @@ describe('corsMiddleware', () => {
   });
 
   it('skips CORS headers when Origin is missing', async () => {
-    const req = new Request('https://worker.example/health', {
+    const req = new Request('https://api.geocache.dev/health', {
       method: 'GET',
     });
 

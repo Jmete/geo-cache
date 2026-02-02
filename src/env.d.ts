@@ -7,6 +7,12 @@
 
 export interface Env {
   // =============================================================================
+  // Rate Limiting
+  // =============================================================================
+  /** Worker rate limiter binding for per-API-key throttling */
+  GEOCODE_RATE_LIMITER: RateLimit;
+
+  // =============================================================================
   // D1 Database
   // =============================================================================
   /** D1 database binding for geocode cache and events */
@@ -40,4 +46,13 @@ export interface Env {
 export interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
   passThroughOnException(): void;
+}
+
+export interface RateLimitResult {
+  success: boolean;
+  retryAfter?: number;
+}
+
+export interface RateLimit {
+  limit(options: { key: string }): Promise<RateLimitResult>;
 }

@@ -29,3 +29,15 @@ database_id = "ENTER_ID_HERE"
 [[kv_namespaces]]
 binding = "GEO_KV"
 id = "ENTER_ID_HERE"
+
+# =============================================================================
+# Worker Rate Limiting (per API key)
+# =============================================================================
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER"
+namespace_id = "1001"
+
+[ratelimits.simple]
+limit = 60
+period = 60

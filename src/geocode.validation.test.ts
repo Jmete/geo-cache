@@ -7,6 +7,9 @@ const baseEnv: Env = {
   ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
   API_KEY: 'test-api-key',
   GEONAMES_USERNAME: 'test-geonames',
+  GEOCODE_RATE_LIMITER: {
+    limit: async () => ({ success: true }),
+  },
   DB: {} as D1Database,
   GEO_KV: {} as KVNamespace,
 };
@@ -19,7 +22,7 @@ const ctx: ExecutionContext = {
 
 describe('geocode request validation', () => {
   it('returns 400 for invalid JSON', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,7 +44,7 @@ describe('geocode request validation', () => {
   });
 
   it('returns 400 for empty text', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,7 +67,7 @@ describe('geocode request validation', () => {
 
   it('returns 400 for overly long text', async () => {
     const longText = 'a'.repeat(513);
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -89,7 +92,7 @@ describe('geocode request validation', () => {
   });
 
   it('returns 405 for wrong method', async () => {
-    const req = new Request('https://worker.example/v1/geocode', {
+    const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'GET',
       headers: {
         'x-api-key': 'test-api-key',
