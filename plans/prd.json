@@ -236,7 +236,7 @@
         "If no country match exists, verify geocoding returns HTTP 200 with low confidence and `flags.ambiguous=true` (or a clear failure code if preferred in design), per documented behavior.",
         "Verify provider timeouts produce a retryable error (502) rather than hanging."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },
