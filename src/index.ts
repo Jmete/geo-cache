@@ -19,7 +19,7 @@ import { ProviderFetchError, ProviderTimeoutError } from './providers';
 
 const app = new Hono<{ Bindings: Env }>();
 const MAX_TEXT_LENGTH = 512;
-const ALLOWED_HOSTS = new Set(['api.geocache.dev']);
+const ALLOWED_HOSTS = new Set(['api.geocache.dev', 'localhost', '127.0.0.1']);
 
 app.use('*', async (c, next) => {
   const hostname = new URL(c.req.url).hostname;
