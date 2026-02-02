@@ -222,7 +222,7 @@
         "Input with ISO3 country (e.g., 'Riyadh, SAU') resolves to countryIso2='SA'.",
         "Input with country name (e.g., 'Saudi Arabia') resolves to countryIso2='SA' without an external call when supported by offline mapping."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },

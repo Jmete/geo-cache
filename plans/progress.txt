@@ -114,3 +114,9 @@
 - Decisions: parser preserves raw tokens; normalization applied at key generation; idempotency verified
 - Files: src/integration/normalization.test.ts, plans/prd.json
 - Notes: 21 tests cover raw preservation, acceptance fixtures (ACC001/007, PROB008/012), stability/consistency (case/whitespace/diacritics/punctuation variations), character preservation (alphanumerics, hyphens, apostrophes)
+
+## F015 - Offline Country to ISO2 Resolution [COMPLETE]
+- Completed: resolveCountryToIso2() for offline country resolution; supports ISO2/ISO3/names/abbreviations
+- Decisions: static mappings (~195 countries) in Maps for O(1) lookup; resolution order: ISO2→ISO3→abbreviations→names→null; abbreviations include KSA→SA, UAE→AE, UK→GB; null return triggers F016 GeoNames fallback
+- Files: src/country/mappings.ts, src/country/index.ts, src/country/index.test.ts, plans/prd.json
+- Notes: 90 tests cover all PRD steps, acceptance fixtures (ACC005/006), problematic fixtures (PROB001-003/009/011/013), edge cases; includes getCountryName() and isValidIso2() helpers
