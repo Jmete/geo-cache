@@ -96,3 +96,9 @@
 - Decisions: use app.all to return 405 for non-POST; treat non-object/non-string text as INVALID_REQUEST; empty text uses trim
 - Files: src/index.ts, src/geocode.validation.test.ts, plans/prd.json
 - Notes: none
+
+## F012 - Rate Limiting (Worker + WAF) [COMPLETE]
+- Completed: per-api-key Worker rate limiter binding + host allowlist; WAF rate rule already in place
+- Decisions: enforce custom domain only (api.geocache.dev) to prevent workers.dev bypass; rate limit on api key for POST /v1/geocode only
+- Files: src/index.ts, src/env.d.ts, src/geocode.validation.test.ts, src/middleware/auth.test.ts, src/middleware/cors.test.ts, wrangler.toml.example
+- Notes: wrangler.toml is gitignored; ensure rate limiter binding is added there in each environment

@@ -179,7 +179,7 @@
         "Trigger the rate limit in a test scenario and verify the API returns 429 with standard error JSON.",
         "Verify rate limiting does not affect `GET /health`."
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Implement via Cloudflare WAF/Rate Limiting configuration; exact mechanism may depend on account features.",
       "risk": "medium",
       "owner": "devops"
