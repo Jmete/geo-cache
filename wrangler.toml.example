@@ -1,0 +1,31 @@
+# Cloudflare Worker Configuration
+# See: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "geo-cache"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# =============================================================================
+# Environment Variables (non-secret)
+# =============================================================================
+
+[vars]
+ALLOWED_ORIGINS = "http://localhost:3000,https://domain.com,https://www.domain.com"
+
+# =============================================================================
+# D1 Database Binding
+# =============================================================================
+
+[[d1_databases]]
+binding = "DB"
+database_name = "geo-cache-db"
+database_id = "ENTER_ID_HERE"
+
+# =============================================================================
+# KV Namespace Binding (Hot Cache)
+# =============================================================================
+
+[[kv_namespaces]]
+binding = "GEO_KV"
+id = "ENTER_ID_HERE"
