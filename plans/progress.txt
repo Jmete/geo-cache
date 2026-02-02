@@ -132,3 +132,9 @@
 - Decisions: sync generateCacheKey() for offline-only; async generateCacheKeyAsync() with GeoNames fallback; __ placeholder for unresolved countries; result includes parsed location, countryIso2, resolvedOffline, countryUnresolved flags
 - Files: src/cache-key/index.ts, src/cache-key/index.test.ts, plans/prd.json
 - Notes: 37 tests cover PRD acceptance criteria, F002 acceptance fixtures, ISO2/ISO3/abbreviations, diacritics, hyphenated names, determinism (case/whitespace/diacritics variations produce identical keys), error propagation for GeoNames timeouts
+
+## F020 - Provider Abstraction [COMPLETE]
+- Completed: Provider interface + pipeline for geocoding providers with fallback and error handling
+- Decisions: Provider interface returns ProviderSearchResult with candidates + usedFallback; pipeline tries providers sequentially, stops on first success; timeouts/errors captured without throwing (hadTimeout/hadError flags); runPipelineStrict() returns discriminated union for explicit success/failure handling
+- Files: src/providers/types.ts, src/providers/pipeline.ts, src/providers/index.ts, src/providers/pipeline.test.ts, plans/prd.json
+- Notes: 20 tests cover PRD steps (candidate fields, sequential execution, timeout handling), edge cases (empty providers, multi-candidate), runPipelineStrict() discriminated result

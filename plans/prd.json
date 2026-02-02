@@ -292,7 +292,7 @@
         "Verify the pipeline can call providers in order and aggregate candidates into a single list.",
         "Verify a provider timeout leads to a pipeline-controlled failure behavior rather than an unhandled exception."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
