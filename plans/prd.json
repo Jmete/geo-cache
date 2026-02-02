@@ -348,7 +348,7 @@
         "Given an input with admin1/city tokens, verify similarity scoring increases score for closer matches and decreases for mismatches.",
         "Verify confidence is clamped to [0,1] and decreases appropriately when only weak matches exist."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },

@@ -168,3 +168,9 @@
 - Decisions: use offline ISO2->name lookup for query; parse bbox only when all coords finite
 - Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, plans/prd.json
 - Notes: none
+
+## F024 - Candidate Scoring [COMPLETE]
+- Task completed: implement candidate scoring + confidence (PRD F024)
+- Decisions: weighted scoring (country/admin1/city/feature/importance), normalized Levenshtein similarity, feature match rules by granularity, log-scaled population, confidence=clamped score
+- Files: src/scoring/index.ts, src/scoring/index.test.ts, plans/prd.json
+- Notes: none
