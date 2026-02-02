@@ -78,3 +78,9 @@
 - Deployed and verified working on Cloudflare Workers
 - Files: src/index.ts
 - Important Note: We are using Wrangler V4: https://developers.cloudflare.com/workers/wrangler/migration/update-v3-to-v4/
+
+## F009 - CORS Allowlist + Preflight [COMPLETE]
+- Task: F009 strict CORS allowlist + OPTIONS handling; allow headers content-type,x-api-key; disallowed origin 403 w/o CORS
+- Decisions: CORS only when Origin present+allowed; OPTIONS returns 204 for allowed, 403 empty for disallowed; keep /health CORS only if origin allowed
+- Files: src/middleware/cors.ts, src/middleware/cors.test.ts, src/index.ts, plans/prd.json, package-lock.json
+- Notes: Installed @rollup/rollup-linux-x64-gnu with npm cache override to fix vitest optional dep issue

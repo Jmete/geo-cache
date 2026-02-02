@@ -43,5 +43,4 @@ codex \
   exec \
   --cd "$REPO_ROOT" \
   --sandbox workspace-write \
-  --add-dir "$PW_CACHE" \
   "$PROMPT"

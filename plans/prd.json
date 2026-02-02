@@ -137,7 +137,7 @@
         "From a disallowed Origin, verify the response does not include permissive CORS headers and results in a blocked browser call.",
         "Verify allowed headers include at least `content-type` and `x-api-key`."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },
