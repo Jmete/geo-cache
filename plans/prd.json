@@ -475,7 +475,7 @@
         "Repeat the same request and verify `cache.hit=true` and the response is identical (except any explicitly documented cache metadata).",
         "Call with an input that cannot be resolved and verify behavior matches the documented error/low-confidence policy (no crashes, consistent error format if failing)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "high",
       "owner": "fullstack"
     },

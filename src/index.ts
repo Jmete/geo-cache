@@ -2,15 +2,20 @@ import { Hono } from 'hono';
 import type { Env } from './env.d';
 import {
   emptyTextError,
+  internalError,
   invalidJsonError,
   invalidRequestError,
   methodNotAllowedError,
   missingTextError,
+  providerError,
+  providerTimeoutError,
   rateLimitedError,
   textTooLongError,
 } from './errors';
 import { authMiddleware } from './middleware/auth';
 import { corsMiddleware } from './middleware/cors';
+import { resolveGeocode } from './geocode';
+import { ProviderFetchError, ProviderTimeoutError } from './providers';
 
 const app = new Hono<{ Bindings: Env }>();
 const MAX_TEXT_LENGTH = 512;
@@ -47,7 +52,7 @@ app.get('/health', (c) => {
   return c.json({ status: 'ok' });
 });
 
-// /v1/geocode - Geocoding endpoint (placeholder - returns 501)
+// /v1/geocode - Geocoding endpoint
 app.all('/v1/geocode', async (c) => {
   if (c.req.method !== 'POST') {
     return c.json(methodNotAllowedError(['POST']), 405);
@@ -85,12 +90,22 @@ app.all('/v1/geocode', async (c) => {
     return c.json(textTooLongError(MAX_TEXT_LENGTH), 400);
   }
 
-  return c.json({
-    error: {
-      code: 'NOT_IMPLEMENTED',
-      message: 'Geocoding endpoint not yet implemented',
-    },
-  }, 501);
+  try {
+    const response = await resolveGeocode(text, {
+      kv: c.env.GEO_KV,
+      db: c.env.DB,
+      geonamesUsername: c.env.GEONAMES_USERNAME,
+    });
+    return c.json(response, 200);
+  } catch (error) {
+    if (error instanceof ProviderTimeoutError) {
+      return c.json(providerTimeoutError(error.provider), 502);
+    }
+    if (error instanceof ProviderFetchError) {
+      return c.json(providerError(error.provider), 502);
+    }
+    return c.json(internalError(), 500);
+  }
 });
 
 // 404 handler for unmatched routes

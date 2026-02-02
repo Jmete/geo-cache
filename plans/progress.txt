@@ -204,3 +204,9 @@
 - Decisions: stable sort flags keys for deterministic storage; update all columns except created_at on conflict to reflect latest canonical data
 - Files: src/cache/d1.ts, src/cache/d1.test.ts, src/db/schema.ts, src/db/schema.test.ts, plans/prd.json
 - Notes: none
+
+## F032 - End-to-End /v1/geocode Flow [COMPLETE]
+- Completed: resolveGeocode pipeline (cache key -> KV/D1 -> provider -> score/select -> persist -> return) with low-confidence fallback responses
+- Decisions: cache/warm KV on D1 hit; cache low-confidence responses for unresolved/no-candidate inputs; map provider timeouts/errors to 502
+- Files: src/geocode/index.ts, src/index.ts, src/geocode/index.test.ts, src/middleware/auth.test.ts, plans/prd.json
+- Notes: fallback responses use ambiguous=true + low confidence when no candidates or country unresolved

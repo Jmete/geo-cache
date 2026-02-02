@@ -80,17 +80,17 @@ describe('authMiddleware', () => {
         'Content-Type': 'application/json',
         'x-api-key': 'test-api-key',
       },
-      body: JSON.stringify({ text: 'Riyadh' }),
+      body: JSON.stringify({ text: '' }),
     });
 
     const res = await app.fetch(req, baseEnv, ctx);
     const payload = await res.json();
 
-    expect(res.status).toBe(501);
+    expect(res.status).toBe(400);
     expect(payload).toEqual({
       error: {
-        code: 'NOT_IMPLEMENTED',
-        message: 'Geocoding endpoint not yet implemented',
+        code: 'TEXT_EMPTY',
+        message: 'Field "text" cannot be empty',
       },
     });
   });
