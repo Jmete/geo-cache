@@ -216,3 +216,9 @@
 - Decisions: uses node to JSON-encode text; supports HOST_HEADER/PORT/URL overrides
 - Files: scripts/dev-geocode.sh, plans/progress.txt
 - Notes: none
+
+## Dev Tooling - Update dev-geocode helper [NON-PRD]
+- Completed: added flags for host/url/port and localhost shortcut; pretty-prints JSON output with fallback to raw
+- Decisions: default Host header remains api.geocache.dev; --localhost sets Host to localhost for dev allowlist overrides
+- Files: scripts/dev-geocode.sh, plans/progress.txt
+- Notes: none
