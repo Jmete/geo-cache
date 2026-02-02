@@ -82,6 +82,30 @@ Test geocoding (replace YOUR_API_KEY):
      -H "x-api-key: YOUR_API_KEY" \
      -d '{"text": "Riyadh, Saudi Arabia"}'
 
+## Step 8: Configure Rate Limiting (per API key)
+
+Policy (baseline): 60 requests per minute per API key for POST /v1/geocode.
+Adjust the threshold based on GeoNames quota and expected traffic.
+
+1. Cloudflare Dashboard -> Security -> WAF -> Rate limiting rules.
+2. Create a new rule with a filter expression:
+   http.request.uri.path eq "/v1/geocode" and
+   http.request.method eq "POST" and
+   http.request.headers["x-api-key"][0] ne ""
+3. Characteristics (rate-limit key): Header -> x-api-key.
+4. Threshold: 60 requests per 60 seconds. Action: Block (HTTP 429).
+5. Custom response (recommended to match API error format):
+   - Status: 429
+   - Content-Type: application/json
+   - Body:
+     {"error":{"code":"RATE_LIMITED","message":"Rate limit exceeded. Please retry later."}}
+6. Save and deploy the rule.
+
+If your plan does not support custom response bodies for rate limiting,
+the 429 body will not match the standard error JSON. In that case,
+consider a Worker-level rate limiter (Durable Object) to preserve
+the API contract.
+
 
 ## Useful Commands
 
