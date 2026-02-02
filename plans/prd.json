@@ -362,7 +362,7 @@
         "Verify tie-break behavior is deterministic (e.g., score desc, importance/population desc, providerId asc) and stable across runs.",
         "Verify candidates with known country mismatch are rejected when countryIso2 is known."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "high",
       "owner": "fullstack"
     },

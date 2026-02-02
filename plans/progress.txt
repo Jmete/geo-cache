@@ -174,3 +174,9 @@
 - Decisions: weighted scoring (country/admin1/city/feature/importance), normalized Levenshtein similarity, feature match rules by granularity, log-scaled population, confidence=clamped score
 - Files: src/scoring/index.ts, src/scoring/index.test.ts, plans/prd.json
 - Notes: none
+
+## F025 - Candidate Selection + Ambiguity Handling [COMPLETE]
+- Task completed: deterministic selection with ambiguity handling (PRD F025)
+- Decisions: ambiguous confidence = average of top two scores to reduce confidence deterministically
+- Files: src/selection/index.ts, src/selection/index.test.ts, plans/prd.json
+- Notes: none
