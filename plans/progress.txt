@@ -138,3 +138,9 @@
 - Decisions: Provider interface returns ProviderSearchResult with candidates + usedFallback; pipeline tries providers sequentially, stops on first success; timeouts/errors captured without throwing (hadTimeout/hadError flags); runPipelineStrict() returns discriminated union for explicit success/failure handling
 - Files: src/providers/types.ts, src/providers/pipeline.ts, src/providers/index.ts, src/providers/pipeline.test.ts, plans/prd.json
 - Notes: 20 tests cover PRD steps (candidate fields, sequential execution, timeout handling), edge cases (empty providers, multi-candidate), runPipelineStrict() discriminated result
+
+## F018 - KV Hot Cache [COMPLETE]
+- Task completed: F018 KV hot-cache read/write w/ deterministic serialization + 30-day TTL
+- Decisions: stableJsonStringify sorts object keys + omits undefined; write forces cache.hit=true before storing
+- Files: src/cache/kv.ts, src/cache/kv.test.ts, plans/prd.json
+- Notes: none

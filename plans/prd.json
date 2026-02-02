@@ -264,7 +264,7 @@
         "On cache miss, verify the response is written to KV and can be retrieved on a subsequent call within TTL.",
         "Verify KV entries expire after TTL (or via configuration inspection if TTL expiry cannot be forced quickly)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
