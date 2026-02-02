@@ -9,6 +9,7 @@ Cloudflare Worker geocoding API backed by GeoNames with D1 + KV caching.
 API_KEY=your-dev-key
 GEONAMES_USERNAME=your-geonames-user
 ALLOW_LOCALHOST_HOSTS=true
+LOG_GEOCODE_HITS=true
 ```
 
 2) Start the worker:
@@ -23,4 +24,5 @@ wrangler dev
 
 Notes:
 - `ALLOW_LOCALHOST_HOSTS` should only be set for local dev.
+- `LOG_GEOCODE_HITS` is optional. When true, cache-hit events are recorded in D1.
 - In production, use `wrangler secret put API_KEY` and `wrangler secret put GEONAMES_USERNAME`.
