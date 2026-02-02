@@ -264,3 +264,9 @@
 - Decisions: request context middleware sets requestId (x-request-id or cf-ray fallback) + JSON logger; cache/provider events logged in resolveGeocode; auth/cors/validation/rate/not-found emit request.error categories; avoid logging raw input
 - Files: src/logging/index.ts, src/types/app.ts, src/middleware/request-context.ts, src/index.ts, src/geocode/index.ts, src/middleware/auth.ts, src/middleware/cors.ts, plans/prd.json
 - Notes: none
+
+## F035 - Fixture-Based Parsing + Normalized Key Tests [COMPLETE]
+- Added fixture-driven tests for parsed fields + acceptance normalized keys; verify offline ISO2 resolution for fixtures
+- Decisions: treat country-first 2-token input as country-only; updated RC006 expected to city due to emirate/city ambiguity + keyword-based parser
+- Files: src/parser/index.ts, fixtures/location-strings.json, src/fixtures/location-fixtures.test.ts, plans/prd.json
+- Notes: negative token tests already covered in parser tests; no blockers

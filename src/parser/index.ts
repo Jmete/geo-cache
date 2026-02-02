@@ -13,6 +13,7 @@
  */
 
 import type { ParsedLocation, Granularity } from '../types/api';
+import { resolveCountryToIso2 } from '../country';
 
 /**
  * Pattern to detect "multiple areas" indicator (case-insensitive)
@@ -54,6 +55,16 @@ function isRegionToken(token: string): boolean {
  */
 function isMultiAreaToken(token: string): boolean {
   return MULTI_AREA_PATTERN.test(token);
+}
+
+/**
+ * Check if a token resolves to a known country ISO2.
+ *
+ * @param token - Token to check
+ * @returns true if token resolves to a country ISO2 offline
+ */
+function isCountryToken(token: string): boolean {
+  return resolveCountryToIso2(token) !== null;
 }
 
 /**
@@ -163,6 +174,17 @@ export function parseLocation(text: string): ParsedLocation {
 
   // Two tokens = city+country or region+country
   if (rest.length === 0) {
+    const firstIsCountry = isCountryToken(first);
+    const secondIsCountry = isCountryToken(second);
+
+    if (firstIsCountry && !secondIsCountry) {
+      return {
+        countryText: first,
+        isMultiArea: false,
+        granularityHint: 'country',
+      };
+    }
+
     if (isRegionToken(first)) {
       return {
         admin1: first,

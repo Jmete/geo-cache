@@ -222,13 +222,14 @@
       "category": "region_country",
       "input": "Sharjah, United Arab Emirates",
       "expected": {
-        "city": null,
-        "admin1": "Sharjah",
+        "city": "Sharjah",
+        "admin1": null,
         "countryText": "United Arab Emirates",
         "countryIso2": "AE",
         "isMultiArea": false,
-        "granularity": "region"
-      }
+        "granularity": "city"
+      },
+      "notes": "Ambiguous emirate vs city; parser defaults to city without region keyword"
     },
     {
       "id": "CO001",

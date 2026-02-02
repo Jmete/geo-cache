@@ -518,7 +518,7 @@
         "Include negative tests for empty tokens, extra commas, and unusual punctuation.",
         "Verify tests pass in CI and locally with deterministic outcomes."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "qa"
     },
