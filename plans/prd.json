@@ -165,7 +165,7 @@
         "Send `{ \"text\": \"\" }` and verify HTTP 400; send overly long text (e.g., > 512 chars) and verify HTTP 400.",
         "Send `GET /v1/geocode` and verify HTTP 405 with standard error JSON."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },

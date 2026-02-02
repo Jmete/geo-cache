@@ -90,3 +90,9 @@
 - Decisions: return 500 if API_KEY unset; CORS middleware still short-circuits OPTIONS/disallowed origins
 - Files: src/middleware/auth.ts, src/middleware/auth.test.ts, src/index.ts, plans/prd.json
 - Notes: None
+
+## F011 - Request Handling Hardening [COMPLETE]
+- Task: enforce method restrictions + JSON parsing + input length checks for /v1/geocode (F011)
+- Decisions: use app.all to return 405 for non-POST; treat non-object/non-string text as INVALID_REQUEST; empty text uses trim
+- Files: src/index.ts, src/geocode.validation.test.ts, plans/prd.json
+- Notes: none

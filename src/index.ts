@@ -1,10 +1,18 @@
 import { Hono } from 'hono';
 import type { Env } from './env.d';
-import { invalidRequestError } from './errors';
+import {
+  emptyTextError,
+  invalidJsonError,
+  invalidRequestError,
+  methodNotAllowedError,
+  missingTextError,
+  textTooLongError,
+} from './errors';
 import { authMiddleware } from './middleware/auth';
 import { corsMiddleware } from './middleware/cors';
 
 const app = new Hono<{ Bindings: Env }>();
+const MAX_TEXT_LENGTH = 512;
 
 app.use('*', corsMiddleware);
 app.use('/v1/*', authMiddleware);
@@ -14,8 +22,44 @@ app.get('/health', (c) => {
   return c.json({ status: 'ok' });
 });
 
-// POST /v1/geocode - Geocoding endpoint (placeholder - returns 501)
-app.post('/v1/geocode', (c) => {
+// /v1/geocode - Geocoding endpoint (placeholder - returns 501)
+app.all('/v1/geocode', async (c) => {
+  if (c.req.method !== 'POST') {
+    return c.json(methodNotAllowedError(['POST']), 405);
+  }
+
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json(invalidJsonError(), 400);
+  }
+
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    return c.json(
+      invalidRequestError('Request body must be a JSON object'),
+      400
+    );
+  }
+
+  const text = (body as Record<string, unknown>).text;
+
+  if (text === undefined) {
+    return c.json(missingTextError(), 400);
+  }
+
+  if (typeof text !== 'string') {
+    return c.json(invalidRequestError('Field "text" must be a string'), 400);
+  }
+
+  if (text.trim().length === 0) {
+    return c.json(emptyTextError(), 400);
+  }
+
+  if (text.length > MAX_TEXT_LENGTH) {
+    return c.json(textTooLongError(MAX_TEXT_LENGTH), 400);
+  }
+
   return c.json({
     error: {
       code: 'NOT_IMPLEMENTED',
