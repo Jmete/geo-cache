@@ -732,7 +732,7 @@
         "Document migration application steps for D1 and how to verify table/index existence.",
         "Document common failure modes (GeoNames timeouts, ambiguous results, country mismatch) and where to see evidence (logs/events)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "devops"
     },

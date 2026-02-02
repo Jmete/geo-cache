@@ -304,3 +304,9 @@
 - Added Next.js server action + route handler examples; outlined rendering rules by granularity
 - Files: docs/api.md, README.md, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F042 - Operational Runbook [COMPLETE]
+- Documented secrets/vars, bindings, migrations, rate limiting, logs/events, troubleshooting
+- Decisions: runbook in docs/runbook.md; reference worker rate limiting config; note LOG_GEOCODE_HITS behavior
+- Files: docs/runbook.md, README.md, plans/prd.json, plans/progress.txt
+- Notes: none
