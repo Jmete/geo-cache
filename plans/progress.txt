@@ -292,3 +292,9 @@
 ## Docs - LOG_GEOCODE_HITS examples [NON-PRD]
 - Added LOG_GEOCODE_HITS examples to .env.example, README.md, and cloudflare-steps.txt
 - Notes: log-hit toggle documented for local dev and wrangler vars
+
+## F038 - /v1/geocode Integration Tests [COMPLETE]
+- Added integration coverage for provider response → KV hit → D1 hit after KV clear
+- Decisions: in-memory KV/D1 stubs persist geocode_cache rows for deterministic cache assertions
+- Files: src/integration/geocode.test.ts, plans/prd.json
+- Notes: none

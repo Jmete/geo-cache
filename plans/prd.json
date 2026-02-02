@@ -560,7 +560,7 @@
         "Second call returns `cache.hit=true` from KV (simulate KV hit) and matches the first response payload.",
         "If KV is cleared, verify D1 hit returns the same cached payload with `cache.hit=true`."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "qa"
     },
