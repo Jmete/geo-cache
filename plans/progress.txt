@@ -210,3 +210,9 @@
 - Decisions: cache/warm KV on D1 hit; cache low-confidence responses for unresolved/no-candidate inputs; map provider timeouts/errors to 502
 - Files: src/geocode/index.ts, src/index.ts, src/geocode/index.test.ts, src/middleware/auth.test.ts, plans/prd.json
 - Notes: fallback responses use ambiguous=true + low confidence when no candidates or country unresolved
+
+## Dev Tooling - Local geocode curl helper [NON-PRD]
+- Completed: added scripts/dev-geocode.sh to wrap local curl with Host header and .dev.vars loading
+- Decisions: uses node to JSON-encode text; supports HOST_HEADER/PORT/URL overrides
+- Files: scripts/dev-geocode.sh, plans/progress.txt
+- Notes: none
