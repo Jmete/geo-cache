@@ -1,6 +1,7 @@
 import type { MiddlewareHandler } from 'hono';
 import type { Env } from '../env.d';
 import { originNotAllowedError } from '../errors';
+import type { AppBindings } from '../types/app';
 
 const ALLOWED_METHODS = ['GET', 'POST', 'OPTIONS'] as const;
 const ALLOWED_HEADERS = ['content-type', 'x-api-key'] as const;
@@ -37,19 +38,30 @@ function applyCorsHeaders(headers: Headers, origin: string): void {
   headers.set('Access-Control-Allow-Headers', ALLOWED_HEADERS.join(','));
 }
 
-export const corsMiddleware: MiddlewareHandler<{ Bindings: Env }> = async (
+export const corsMiddleware: MiddlewareHandler<AppBindings> = async (
   c,
   next
 ) => {
+  const logger = c.get('logger');
   const origin = c.req.header('origin');
   const allowedOrigins = getAllowedOrigins(c.env);
   const isAllowedOrigin = origin !== undefined && allowedOrigins.has(origin);
 
   if (origin !== undefined && !isAllowedOrigin) {
     if (c.req.method === 'OPTIONS') {
+      logger.warn('request.error', {
+        category: 'cors',
+        status: 403,
+        reason: 'preflight_origin_not_allowed',
+      });
       return new Response(null, { status: 403 });
     }
 
+    logger.warn('request.error', {
+      category: 'cors',
+      status: 403,
+      reason: 'origin_not_allowed',
+    });
     return new Response(JSON.stringify(originNotAllowedError()), {
       status: 403,
       headers: {

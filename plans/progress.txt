@@ -258,3 +258,9 @@
 - Decisions: include uptimeMs + timestamp while keeping payload small; reuse existing CORS allowlist behavior
 - Files: src/index.ts, src/middleware/auth.test.ts, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F031 - Structured Logging [COMPLETE]
+- Task: add request-scoped structured logging for request IDs, cache status, provider timings, error categories; avoid secret leakage
+- Decisions: request context middleware sets requestId (x-request-id or cf-ray fallback) + JSON logger; cache/provider events logged in resolveGeocode; auth/cors/validation/rate/not-found emit request.error categories; avoid logging raw input
+- Files: src/logging/index.ts, src/types/app.ts, src/middleware/request-context.ts, src/index.ts, src/geocode/index.ts, src/middleware/auth.ts, src/middleware/cors.ts, plans/prd.json
+- Notes: none

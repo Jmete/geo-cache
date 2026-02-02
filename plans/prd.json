@@ -446,7 +446,7 @@
         "Verify logs include provider latency measurements for uncached calls.",
         "Verify logs never contain API keys, GeoNames username, or full raw provider responses beyond the truncation policy."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },

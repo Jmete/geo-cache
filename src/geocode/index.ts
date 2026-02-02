@@ -21,6 +21,7 @@ import type {
   ParsedLocation,
   ProviderCandidate,
 } from '../types/api';
+import type { Logger } from '../logging';
 
 const PROVIDERS = [new GeoNamesProvider()];
 const DEFAULT_PROVIDER_TIMEOUT_MS = 7000;
@@ -32,6 +33,7 @@ export interface ResolveGeocodeDependencies {
   geonamesUsername: string;
   timeoutMs?: number;
   providers?: Provider[];
+  logger?: Logger;
 }
 
 function cleanToken(value: string | null | undefined): string | undefined {
@@ -224,7 +226,7 @@ export async function resolveGeocode(
   text: string,
   deps: ResolveGeocodeDependencies
 ): Promise<GeocodeResponse> {
-  const { kv, db, geonamesUsername } = deps;
+  const { kv, db, geonamesUsername, logger } = deps;
   const timeoutMs = deps.timeoutMs ?? DEFAULT_PROVIDER_TIMEOUT_MS;
   const providers = deps.providers ?? PROVIDERS;
 
@@ -235,11 +237,13 @@ export async function resolveGeocode(
 
   const kvHit = await readGeocodeFromKv(kv, cacheKey.key);
   if (kvHit && kvHit.normalizedKey === cacheKey.key) {
+    logger?.info('geocode.cache_hit', { cache: 'kv' });
     return kvHit;
   }
 
   const d1Hit = await readGeocodeFromD1(db, cacheKey.key);
   if (d1Hit && d1Hit.normalizedKey === cacheKey.key) {
+    logger?.info('geocode.cache_hit', { cache: 'd1' });
     await writeGeocodeToKv(kv, cacheKey.key, d1Hit);
     return d1Hit;
   }
@@ -247,6 +251,11 @@ export async function resolveGeocode(
   const providerName = providerNameForResult([], providers);
 
   if (!cacheKey.countryIso2) {
+    logger?.warn('geocode.fallback', {
+      reason: 'country_unresolved',
+      cache: 'none',
+      provider: providerName,
+    });
     const fallback = buildFallbackResponse({
       text,
       key: cacheKey.key,
@@ -265,6 +274,7 @@ export async function resolveGeocode(
   }
 
   const query = buildProviderQuery(cacheKey.parsed, cacheKey.countryIso2);
+  const providerStart = Date.now();
   const pipelineResult = await runPipelineStrict(query, {
     providers,
     timeout: timeoutMs,
@@ -272,8 +282,20 @@ export async function resolveGeocode(
       geonames: { username: geonamesUsername },
     },
   });
+  const providerDurationMs = Date.now() - providerStart;
 
   if (!pipelineResult.success) {
+    const errorType = pipelineResult.hadTimeout ? 'timeout' : 'error';
+    const provider =
+      pipelineResult.errors[0]?.provider ?? providerNameForResult([], providers);
+    logger?.error('geocode.provider_error', {
+      category: pipelineResult.hadTimeout ? 'provider_timeout' : 'provider_error',
+      cache: 'provider',
+      provider,
+      durationMs: providerDurationMs,
+      errorType,
+      errorCount: pipelineResult.errors.length,
+    });
     if (pipelineResult.hadTimeout) {
       throw new ProviderTimeoutError();
     }
@@ -281,10 +303,31 @@ export async function resolveGeocode(
     throw new ProviderFetchError(message);
   }
 
-  const { candidates, providersUsed, usedFallback } = pipelineResult.result;
+  const {
+    candidates,
+    providersUsed,
+    usedFallback,
+    hadTimeout,
+    hadError,
+  } = pipelineResult.result;
   const resolvedProviderName = providerNameForResult(providersUsed, providers);
+  logger?.info('geocode.provider_call', {
+    cache: 'provider',
+    provider: resolvedProviderName,
+    durationMs: providerDurationMs,
+    usedFallback,
+    candidates: candidates.length,
+    hadTimeout,
+    hadError,
+  });
 
   if (candidates.length === 0) {
+    logger?.warn('geocode.fallback', {
+      reason: 'no_candidates',
+      cache: 'provider',
+      provider: resolvedProviderName,
+      usedFallback,
+    });
     const fallback = buildFallbackResponse({
       text,
       key: cacheKey.key,
@@ -311,6 +354,12 @@ export async function resolveGeocode(
 
   const selection = selectBestCandidate(scored, cacheKey.countryIso2);
   if (!selection.best || selection.confidence === null) {
+    logger?.warn('geocode.fallback', {
+      reason: 'selection_failed',
+      cache: 'provider',
+      provider: resolvedProviderName,
+      usedFallback,
+    });
     const fallback = buildFallbackResponse({
       text,
       key: cacheKey.key,

@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import type { Env } from './env.d';
 import {
   emptyTextError,
   internalError,
@@ -14,10 +13,12 @@ import {
 } from './errors';
 import { authMiddleware } from './middleware/auth';
 import { corsMiddleware } from './middleware/cors';
+import { requestContextMiddleware } from './middleware/request-context';
 import { resolveGeocode } from './geocode';
 import { ProviderFetchError, ProviderTimeoutError } from './providers';
+import type { AppBindings } from './types/app';
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<AppBindings>();
 const MAX_TEXT_LENGTH = 512;
 const BASE_ALLOWED_HOSTS = new Set(['api.geocache.dev']);
 const DEV_ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1']);
@@ -35,6 +36,7 @@ app.use('*', async (c, next) => {
   }
   return next();
 });
+app.use('*', requestContextMiddleware);
 app.use('*', corsMiddleware);
 app.use('/v1/*', authMiddleware);
 app.use('/v1/geocode', async (c, next) => {
@@ -47,6 +49,10 @@ app.use('/v1/geocode', async (c, next) => {
     const key = `${apiKey}:POST:/v1/geocode`;
     const { success } = await c.env.GEOCODE_RATE_LIMITER.limit({ key });
     if (!success) {
+      c.get('logger').warn('request.error', {
+        category: 'rate_limit',
+        status: 429,
+      });
       return c.json(rateLimitedError(), 429);
     }
   }
@@ -65,7 +71,12 @@ app.get('/health', (c) => {
 
 // /v1/geocode - Geocoding endpoint
 app.all('/v1/geocode', async (c) => {
+  const logger = c.get('logger');
   if (c.req.method !== 'POST') {
+    logger.warn('request.error', {
+      category: 'method_not_allowed',
+      status: 405,
+    });
     return c.json(methodNotAllowedError(['POST']), 405);
   }
 
@@ -73,10 +84,20 @@ app.all('/v1/geocode', async (c) => {
   try {
     body = await c.req.json();
   } catch {
+    logger.warn('request.error', {
+      category: 'validation',
+      status: 400,
+      code: 'INVALID_JSON',
+    });
     return c.json(invalidJsonError(), 400);
   }
 
   if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    logger.warn('request.error', {
+      category: 'validation',
+      status: 400,
+      code: 'INVALID_REQUEST',
+    });
     return c.json(
       invalidRequestError('Request body must be a JSON object'),
       400
@@ -86,18 +107,38 @@ app.all('/v1/geocode', async (c) => {
   const text = (body as Record<string, unknown>).text;
 
   if (text === undefined) {
+    logger.warn('request.error', {
+      category: 'validation',
+      status: 400,
+      code: 'MISSING_TEXT',
+    });
     return c.json(missingTextError(), 400);
   }
 
   if (typeof text !== 'string') {
+    logger.warn('request.error', {
+      category: 'validation',
+      status: 400,
+      code: 'INVALID_REQUEST',
+    });
     return c.json(invalidRequestError('Field "text" must be a string'), 400);
   }
 
   if (text.trim().length === 0) {
+    logger.warn('request.error', {
+      category: 'validation',
+      status: 400,
+      code: 'TEXT_EMPTY',
+    });
     return c.json(emptyTextError(), 400);
   }
 
   if (text.length > MAX_TEXT_LENGTH) {
+    logger.warn('request.error', {
+      category: 'validation',
+      status: 400,
+      code: 'TEXT_TOO_LONG',
+    });
     return c.json(textTooLongError(MAX_TEXT_LENGTH), 400);
   }
 
@@ -106,6 +147,7 @@ app.all('/v1/geocode', async (c) => {
       kv: c.env.GEO_KV,
       db: c.env.DB,
       geonamesUsername: c.env.GEONAMES_USERNAME,
+      logger,
     });
     return c.json(response, 200);
   } catch (error) {
@@ -115,12 +157,21 @@ app.all('/v1/geocode', async (c) => {
     if (error instanceof ProviderFetchError) {
       return c.json(providerError(error.provider), 502);
     }
+    logger.error('request.error', {
+      category: 'internal',
+      status: 500,
+      errorType: error instanceof Error ? error.name : 'UnknownError',
+    });
     return c.json(internalError(), 500);
   }
 });
 
 // 404 handler for unmatched routes
 app.notFound((c) => {
+  c.get('logger').warn('request.error', {
+    category: 'not_found',
+    status: 404,
+  });
   return c.json(invalidRequestError(`Route not found: ${c.req.method} ${c.req.path}`), 404);
 });
 
