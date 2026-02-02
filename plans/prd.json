@@ -151,7 +151,7 @@
         "Call `POST /v1/geocode` without `x-api-key` and verify it returns 401 with standard error JSON and no sensitive details.",
         "Call `POST /v1/geocode` with an incorrect `x-api-key` and verify 401; with correct key verify authentication passes."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },

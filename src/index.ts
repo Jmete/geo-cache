@@ -1,11 +1,13 @@
 import { Hono } from 'hono';
 import type { Env } from './env.d';
 import { invalidRequestError } from './errors';
+import { authMiddleware } from './middleware/auth';
 import { corsMiddleware } from './middleware/cors';
 
 const app = new Hono<{ Bindings: Env }>();
 
 app.use('*', corsMiddleware);
+app.use('/v1/*', authMiddleware);
 
 // GET /health - Health check endpoint (no auth required)
 app.get('/health', (c) => {

@@ -84,3 +84,9 @@
 - Decisions: CORS only when Origin present+allowed; OPTIONS returns 204 for allowed, 403 empty for disallowed; keep /health CORS only if origin allowed
 - Files: src/middleware/cors.ts, src/middleware/cors.test.ts, src/index.ts, plans/prd.json, package-lock.json
 - Notes: Installed @rollup/rollup-linux-x64-gnu with npm cache override to fix vitest optional dep issue
+
+## F010 - API Key Auth [COMPLETE]
+- Added auth middleware for /v1/* requiring x-api-key, constant-time compare, 401 errors; /health unaffected
+- Decisions: return 500 if API_KEY unset; CORS middleware still short-circuits OPTIONS/disallowed origins
+- Files: src/middleware/auth.ts, src/middleware/auth.test.ts, src/index.ts, plans/prd.json
+- Notes: None
