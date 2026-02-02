@@ -208,7 +208,7 @@
         "Verify normalization does not delete meaningful alphabetic characters (e.g., keeps letters and numbers).",
         "Confirm normalization output is used for key generation and similarity scoring, while raw input is preserved."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },

@@ -108,3 +108,9 @@
 - Decisions: 2-token disambiguation via region keywords (region/province/governorate/emirate/district/prefecture/state/oblast/county); preserves raw tokens w/o normalization (normalization done separately per F005)
 - Files: src/parser/index.ts, src/parser/index.test.ts, plans/prd.json
 - Notes: 31 tests cover PRD steps, fixture categories, edge cases (double commas, whitespace, diacritics, hyphens)
+
+## F014 - Token Normalization Integration Tests [COMPLETE]
+- Completed: integration tests validating parser→normalizer→key generation flow
+- Decisions: parser preserves raw tokens; normalization applied at key generation; idempotency verified
+- Files: src/integration/normalization.test.ts, plans/prd.json
+- Notes: 21 tests cover raw preservation, acceptance fixtures (ACC001/007, PROB008/012), stability/consistency (case/whitespace/diacritics/punctuation variations), character preservation (alphanumerics, hyphens, apostrophes)
