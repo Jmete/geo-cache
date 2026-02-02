@@ -334,7 +334,7 @@
         "Verify bbox is extracted when present and mapped into `[west,south,east,north]`.",
         "Verify provider returns an empty list (not error) when no match exists."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },

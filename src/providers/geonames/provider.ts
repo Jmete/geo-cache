@@ -1,7 +1,7 @@
 /**
- * GeoNames Provider (F021/F022)
+ * GeoNames Provider (F021/F022/F023)
  *
- * Implements city-level and ADM1 region-level GeoNames search.
+ * Implements city-level, ADM1 region-level, and country-level GeoNames search.
  */
 
 import type {
@@ -10,9 +10,11 @@ import type {
   ProviderQuery,
   ProviderSearchResult,
 } from '../types';
-import type { ProviderCandidate } from '../../types/api';
+import type { GeoBbox, ProviderCandidate } from '../../types/api';
+import { getCountryName } from '../../country';
 import {
   ProviderFetchError,
+  searchCountryPCLI,
   searchAdmin1,
   searchCity,
   type GeoNamesConfig,
@@ -69,7 +71,36 @@ function mapBaseCandidate(
     candidate.population = result.population;
   }
 
+  const bbox = parseGeoNamesBbox(result.bbox);
+  if (bbox) {
+    candidate.bbox = bbox;
+  }
+
   return candidate;
+}
+
+function parseGeoNamesBbox(
+  bbox: GeoNamesSearchResult['bbox']
+): GeoBbox | undefined {
+  if (!bbox) {
+    return undefined;
+  }
+
+  const west = Number(bbox.west);
+  const south = Number(bbox.south);
+  const east = Number(bbox.east);
+  const north = Number(bbox.north);
+
+  if (
+    !Number.isFinite(west) ||
+    !Number.isFinite(south) ||
+    !Number.isFinite(east) ||
+    !Number.isFinite(north)
+  ) {
+    return undefined;
+  }
+
+  return [west, south, east, north];
 }
 
 function mapCityCandidate(
@@ -112,6 +143,13 @@ function mapAdmin1Candidate(
   return candidate;
 }
 
+function mapCountryCandidate(
+  result: GeoNamesSearchResult,
+  fallbackCountryIso2: string
+): ProviderCandidate | null {
+  return mapBaseCandidate(result, fallbackCountryIso2);
+}
+
 export class GeoNamesProvider implements Provider {
   readonly name = 'geonames';
 
@@ -142,6 +180,20 @@ export class GeoNamesProvider implements Provider {
         .map((result) => mapAdmin1Candidate(result, query.countryIso2))
         .filter((candidate): candidate is ProviderCandidate => candidate !== null);
       return { candidates, usedFallback: false };
+    }
+
+    if (query.granularityHint === 'country') {
+      const countryQuery =
+        getCountryName(query.countryIso2) ?? query.countryIso2;
+      const result = await searchCountryPCLI(countryQuery, geoNamesConfig);
+      if (!result) {
+        return { candidates: [], usedFallback: false };
+      }
+
+      const candidate = mapCountryCandidate(result, query.countryIso2);
+      return candidate
+        ? { candidates: [candidate], usedFallback: false }
+        : { candidates: [], usedFallback: false };
     }
 
     return { candidates: [], usedFallback: false };

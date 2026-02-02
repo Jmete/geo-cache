@@ -33,6 +33,12 @@ export interface GeoNamesSearchResult {
   population?: number;
   adminName1?: string;
   adminCode1?: string;
+  bbox?: {
+    west?: string | number;
+    south?: string | number;
+    east?: string | number;
+    north?: string | number;
+  };
 }
 
 interface GeoNamesResponse {

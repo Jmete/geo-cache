@@ -162,3 +162,9 @@
 - Decisions: split base/city/admin1 mapping to avoid city field for region results; admin1 uses adminName1 fallback to name
 - Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/index.ts, src/providers/geonames/client.test.ts, src/providers/geonames/provider.test.ts, plans/prd.json
 - Notes: none
+
+## F023 - GeoNames Country Provider (PCLI) [COMPLETE]
+- Completed: GeoNames provider now handles country-level PCLI search with bbox mapping
+- Decisions: use offline ISO2->name lookup for query; parse bbox only when all coords finite
+- Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, plans/prd.json
+- Notes: none
