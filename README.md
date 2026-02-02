@@ -2,6 +2,9 @@
 
 Cloudflare Worker geocoding API backed by GeoNames with D1 + KV caching.
 
+Docs:
+- `docs/api.md` - v1 API usage, response fields, and Next.js examples
+
 ## Local development
 
 1) Create a `.dev.vars` file (gitignored):

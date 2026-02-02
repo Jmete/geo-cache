@@ -298,3 +298,9 @@
 - Decisions: in-memory KV/D1 stubs persist geocode_cache rows for deterministic cache assertions
 - Files: src/integration/geocode.test.ts, plans/prd.json
 - Notes: none
+
+## F041 - API Usage Documentation [COMPLETE]
+- Documented v1 API usage, request/response shapes, error format, and caching expectations
+- Added Next.js server action + route handler examples; outlined rendering rules by granularity
+- Files: docs/api.md, README.md, plans/prd.json, plans/progress.txt
+- Notes: none
