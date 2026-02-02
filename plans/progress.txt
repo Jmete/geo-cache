@@ -246,3 +246,9 @@
 - Decisions: emphasize dev-only localhost flag and helper script usage
 - Files: cloudflare-steps.txt, plans/progress.txt
 - Notes: none
+
+## Dev Docs - wrangler.toml.example note [NON-PRD]
+- Completed: added commented ALLOW_LOCALHOST_HOSTS hint in wrangler.toml.example
+- Decisions: keep dev-only flag commented to avoid prod confusion
+- Files: wrangler.toml.example, plans/progress.txt
+- Notes: none

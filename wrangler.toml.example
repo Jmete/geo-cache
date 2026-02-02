@@ -12,6 +12,8 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ALLOWED_ORIGINS = "http://localhost:3000,https://domain.com,https://www.domain.com"
+# Local dev only: enable localhost Host header acceptance
+# ALLOW_LOCALHOST_HOSTS = "true"
 
 # =============================================================================
 # D1 Database Binding
@@ -29,6 +31,7 @@ database_id = "ENTER_ID_HERE"
 [[kv_namespaces]]
 binding = "GEO_KV"
 id = "ENTER_ID_HERE"
+preview_id = "ENTER_ID_HERE"
 
 # =============================================================================
 # Worker Rate Limiting (per API key)
