@@ -1,0 +1,105 @@
+# Cloudflare Setup Instructions for geo-cache Worker
+
+## Prerequisites
+
+1. Install Wrangler CLI:
+   npm install -g wrangler
+
+2. Authenticate with Cloudflare:
+   wrangler login
+
+
+## Step 1: Create D1 Database
+
+The database is already configured in wrangler.toml. If you need to create a new one:
+
+   wrangler d1 create geo-cache-db
+
+Then update the database_id in wrangler.toml with the returned ID.
+
+
+## Step 2: Run D1 Migrations
+
+Apply the schema migrations:
+
+   wrangler d1 execute geo-cache-db --remote --file=migrations/0001_create_geocode_cache.sql
+   wrangler d1 execute geo-cache-db --remote --file=migrations/0002_create_geocode_events.sql
+
+To verify tables were created:
+
+   wrangler d1 execute geo-cache-db --remote --command="SELECT name FROM sqlite_master WHERE type='table';"
+
+
+## Step 3: Create KV Namespace
+
+The KV namespace is already configured in wrangler.toml. If you need to create a new one:
+
+   wrangler kv namespace create GEO_KV
+
+Then update the id in wrangler.toml with the returned ID.
+
+
+## Step 4: Set Secrets
+
+Set the required secrets (these are not stored in wrangler.toml for security):
+
+   wrangler secret put GEONAMES_USERNAME
+   # Enter your GeoNames username when prompted (from https://www.geonames.org/login)
+
+   wrangler secret put API_KEY
+   # This is a key YOU create to authenticate clients calling your API.
+   # Generate a secure random string (e.g., a UUID) and enter it when prompted.
+   # Your Next.js app will send this value in the x-api-key header.
+
+
+## Step 5: Configure Allowed Origins
+
+Edit the ALLOWED_ORIGINS in wrangler.toml to include your production domain(s):
+
+   [vars]
+   ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com"
+
+Multiple origins should be comma-separated (no spaces).
+
+
+## Step 6: Deploy the Worker
+
+   wrangler deploy
+
+This deploys to your Cloudflare account using the settings in wrangler.toml.
+
+
+## Step 7: Verify Deployment
+
+Test the health endpoint:
+
+   curl https://geo-cache.<your-subdomain>.workers.dev/health
+
+Test geocoding (replace YOUR_API_KEY):
+
+   curl -X POST https://geo-cache.<your-subdomain>.workers.dev/v1/geocode \
+     -H "Content-Type: application/json" \
+     -H "x-api-key: YOUR_API_KEY" \
+     -d '{"text": "Riyadh, Saudi Arabia"}'
+
+
+## Useful Commands
+
+View deployment status:
+   wrangler deployments list
+
+View real-time logs:
+   wrangler tail
+
+Rollback to previous version:
+   wrangler rollback
+
+Check D1 database:
+   wrangler d1 execute geo-cache-db --remote --command="SELECT COUNT(*) FROM geocode_cache;"
+
+
+## Troubleshooting
+
+- If secrets aren't working, verify with: wrangler secret list
+- If D1 queries fail, check migrations ran successfully
+- If CORS errors occur, verify ALLOWED_ORIGINS includes your client's origin

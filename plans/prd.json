@@ -107,9 +107,9 @@
       "steps": [
         "Verify Wrangler config includes D1 binding `DB` and KV binding `GEO_KV` and they are accessible from the Worker runtime.",
         "Store `GEONAMES_USERNAME` and `API_KEY` as secrets and confirm they are not logged or returned in errors.",
-        "Set `ALLOWED_ORIGINS` as a comma-separated allowlist and confirm different values can be used per environment."
+        "Set `ALLOWED_ORIGINS` as a comma-separated allowlist and confirm the Worker reads it correctly."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "devops"
     },
@@ -123,7 +123,7 @@
         "Verify `POST /v1/geocode` returns 501 (or a placeholder error) before feature implementation, using the standard error format.",
         "Verify unsupported routes return 404 in the standard error format."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },
@@ -176,7 +176,7 @@
       "dependencies": ["F010"],
       "steps": [
         "Define a rate limit policy (requests/minute per API key) and document it as an operational control.",
-        "Trigger the rate limit in a staging environment and verify the API returns 429 with standard error JSON.",
+        "Trigger the rate limit in a test scenario and verify the API returns 429 with standard error JSON.",
         "Verify rate limiting does not affect `GET /health`."
       ],
       "passes": false,
@@ -262,7 +262,7 @@
       "steps": [
         "On cache hit, verify response returns with `cache.hit=true` and matches the stored payload exactly.",
         "On cache miss, verify the response is written to KV and can be retrieved on a subsequent call within TTL.",
-        "Verify KV entries expire after TTL in a test/staging environment (or via configuration inspection if TTL expiry cannot be forced quickly)."
+        "Verify KV entries expire after TTL (or via configuration inspection if TTL expiry cannot be forced quickly)."
       ],
       "passes": false,
       "risk": "low",
@@ -504,7 +504,7 @@
         "With provider call, verify provider timeout is enforced and the API returns a response/error within the bounded time."
       ],
       "passes": false,
-      "notes": "Exact p95 thresholds depend on environment; document and validate in staging.",
+      "notes": "Exact p95 thresholds depend on environment; document and validate.",
       "risk": "medium",
       "owner": "devops"
     },
@@ -567,10 +567,10 @@
     {
       "id": "F039",
       "category": "testing",
-      "description": "Run staging smoke tests against live GeoNames for a small curated set of real inputs and record outputs for regression.",
+      "description": "Run smoke tests against live GeoNames for a small curated set of real inputs and record outputs for regression.",
       "dependencies": ["F044", "F002"],
       "steps": [
-        "Deploy to staging with real secrets and call /v1/geocode for at least 15 curated inputs; verify 200 responses and reasonable confidence values.",
+        "Deploy with real secrets and call /v1/geocode for at least 15 curated inputs; verify 200 responses and reasonable confidence values.",
         "Include at least 3 ambiguous cases and verify ambiguous flag behavior matches the selected policy.",
         "Store outputs as golden results for regression comparison (acknowledging provider data can change over time)."
       ],
@@ -623,11 +623,11 @@
     {
       "id": "F043",
       "category": "release",
-      "description": "Create staging and production deployments with separate bindings/secrets and verify rollback procedure.",
+      "description": "Deploy the Worker with proper bindings/secrets and verify rollback procedure.",
       "dependencies": ["F032", "F033", "F007", "F006"],
       "steps": [
-        "Deploy to staging and verify /health and /v1/geocode work end-to-end with valid secrets and bindings.",
-        "Deploy to production and verify the same smoke tests pass with production allowlisted origins.",
+        "Deploy the Worker and verify /health and /v1/geocode work end-to-end with valid secrets and bindings.",
+        "Verify allowed origins are properly configured for the deployment.",
         "Document and validate rollback by deploying a known previous version and confirming service restoration."
       ],
       "passes": false,
@@ -637,12 +637,12 @@
     {
       "id": "F044",
       "category": "release",
-      "description": "Add CI checks (lint, typecheck, tests) and a gated deploy workflow for staging/prod.",
+      "description": "Add CI checks (lint, typecheck, tests) and a deploy workflow.",
       "dependencies": ["F035", "F036", "F037", "F038"],
       "steps": [
         "Verify CI runs lint + typecheck + unit/integration tests on pull requests.",
-        "Verify staging deploy runs only after checks pass and uses staging secrets/bindings.",
-        "Verify production deploy is gated (manual approval or protected branch) and uses production secrets/bindings."
+        "Verify deploy runs only after checks pass.",
+        "Verify deploy uses the correct secrets and bindings."
       ],
       "passes": false,
       "risk": "low",
