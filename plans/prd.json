@@ -571,7 +571,7 @@
         "Verify /health does not require an API key and does not return CORS headers beyond what is required (safe defaults).",
         "Verify /health remains responsive even when provider calls are failing (no provider dependency)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "fullstack"
     },

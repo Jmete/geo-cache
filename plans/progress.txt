@@ -347,3 +347,9 @@
 - Added docs/smoke-tests.md with execution steps + golden output guidance
 - Files: scripts/smoke-geocode.mjs, fixtures/smoke-inputs.txt, docs/smoke-tests.md, plans/progress.txt
 - Notes: live run + golden outputs pending (requires deployed URL + API key)
+
+## F039 - Live GeoNames Smoke Tests [COMPLETE]
+- Completed live run 2026-02-03; 23 inputs, 5 ambiguous flagged; 0 failures
+- Golden output saved: fixtures/smoke-outputs/smoke-outputs-20260203.json
+- Files: fixtures/smoke-outputs/smoke-outputs-20260203.json, plans/prd.json, plans/progress.txt
+- Notes: some responses were cache hits; ambiguous coverage satisfied

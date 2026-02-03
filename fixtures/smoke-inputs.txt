@@ -1,10 +1,12 @@
 # Saudi-centric coverage
 Riyadh, Saudi Arabia
+Riyadh, Riyadh Region, Saudi Arabia
 Jeddah, Saudi Arabia
 Dammam, Saudi Arabia
 Mecca, Saudi Arabia
 Medina, Saudi Arabia
 Abha, Saudi Arabia
+Sharurah, Najran Region, Saudi Arabia
 Najran Region, Saudi Arabia
 Eastern Province, Saudi Arabia
 Multiple Areas, Saudi Arabia
@@ -21,3 +23,7 @@ Sao Paulo, Brazil
 Springfield, USA
 Portland, USA
 San Jose, USA
+Columbus, USA
+Jackson, USA
+Salem, USA
+

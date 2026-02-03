@@ -1,0 +1,737 @@
+{
+  "runAt": "2026-02-03T01:28:18.155Z",
+  "url": "https://api.geocache.dev/v1/geocode",
+  "origin": "https://geocache.dev",
+  "inputsFile": "fixtures/smoke-inputs.txt",
+  "inputs": [
+    "Riyadh, Saudi Arabia",
+    "Riyadh, Riyadh Region, Saudi Arabia",
+    "Jeddah, Saudi Arabia",
+    "Dammam, Saudi Arabia",
+    "Mecca, Saudi Arabia",
+    "Medina, Saudi Arabia",
+    "Abha, Saudi Arabia",
+    "Sharurah, Najran Region, Saudi Arabia",
+    "Najran Region, Saudi Arabia",
+    "Eastern Province, Saudi Arabia",
+    "Multiple Areas, Saudi Arabia",
+    "Saudi Arabia",
+    "Cairo, Egypt",
+    "Dubai, United Arab Emirates",
+    "Istanbul, Turkey",
+    "Paris, France",
+    "Sao Paulo, Brazil",
+    "Springfield, USA",
+    "Portland, USA",
+    "San Jose, USA",
+    "Columbus, USA",
+    "Jackson, USA",
+    "Salem, USA"
+  ],
+  "summary": {
+    "ok": 23,
+    "failed": 0,
+    "ambiguous": 5,
+    "statuses": {
+      "200": 23
+    }
+  },
+  "results": [
+    {
+      "input": "Riyadh, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 478.802604,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Riyadh Region",
+          "city": "Riyadh",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Riyadh, Riyadh Region, Saudi Arabia"
+        },
+        "confidence": 0.982544665676374,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Riyadh, Saudi Arabia"
+        },
+        "normalizedKey": "SA||riyadh|",
+        "point": {
+          "lat": 24.68773,
+          "lon": 46.72185
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Riyadh, Riyadh Region, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 155.287197,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Riyadh Region",
+          "city": "Riyadh",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Riyadh, Riyadh Region, Saudi Arabia"
+        },
+        "confidence": 0.9860357325410992,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Riyadh, Riyadh Region, Saudi Arabia"
+        },
+        "normalizedKey": "SA|riyadh region|riyadh|",
+        "point": {
+          "lat": 24.68773,
+          "lon": 46.72185
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Jeddah, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 159.69211699999983,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Mecca Region",
+          "city": "Jeddah",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Jeddah, Mecca Region, Saudi Arabia"
+        },
+        "confidence": 0.9833232652618746,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Jeddah, Saudi Arabia"
+        },
+        "normalizedKey": "SA||jeddah|",
+        "point": {
+          "lat": 21.49012,
+          "lon": 39.18624
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Dammam, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 146.13248999999996,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Eastern Province",
+          "city": "Dammam",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Dammam, Eastern Province, Saudi Arabia"
+        },
+        "confidence": 0.974003270991122,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Dammam, Saudi Arabia"
+        },
+        "normalizedKey": "SA||dammam|",
+        "point": {
+          "lat": 26.43442,
+          "lon": 50.10326
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Mecca, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 144.42298899999992,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Mecca Region",
+          "city": "Mecca",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Mecca, Mecca Region, Saudi Arabia"
+        },
+        "confidence": 0.9756353066961005,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Mecca, Saudi Arabia"
+        },
+        "normalizedKey": "SA||mecca|",
+        "point": {
+          "lat": 21.42664,
+          "lon": 39.82563
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Medina, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 139.1814989999998,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Medina Region",
+          "city": "Medina",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Medina, Medina Region, Saudi Arabia"
+        },
+        "confidence": 0.9742656054781272,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Medina, Saudi Arabia"
+        },
+        "normalizedKey": "SA||medina|",
+        "point": {
+          "lat": 24.46861,
+          "lon": 39.61417
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Abha, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 145.5490420000001,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "'Asir Region",
+          "city": "Abhā",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Abhā, 'Asir Region, Saudi Arabia"
+        },
+        "confidence": 0.961440909406928,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Abha, Saudi Arabia"
+        },
+        "normalizedKey": "SA||abha|",
+        "point": {
+          "lat": 18.21639,
+          "lon": 42.50528
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Sharurah, Najran Region, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 140.0590790000001,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Najran Region",
+          "city": "Sharurah",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Sharurah, Najran Region, Saudi Arabia"
+        },
+        "confidence": 0.9,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Sharurah, Najran Region, Saudi Arabia"
+        },
+        "normalizedKey": "SA|najran region|sharurah|",
+        "point": {
+          "lat": 17.49083,
+          "lon": 47.11262
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Najran Region, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 146.06545899999992,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Najran Region",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Najran Region, Saudi Arabia"
+        },
+        "confidence": 0.9642172612074784,
+        "flags": {},
+        "granularity": "region",
+        "input": {
+          "raw": "Najran Region, Saudi Arabia"
+        },
+        "normalizedKey": "SA|najran region||",
+        "point": {
+          "lat": 18.41667,
+          "lon": 46.91667
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Eastern Province, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 133.59023099999968,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Eastern Province",
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Eastern Province, Saudi Arabia"
+        },
+        "confidence": 0.9825302151768636,
+        "flags": {},
+        "granularity": "region",
+        "input": {
+          "raw": "Eastern Province, Saudi Arabia"
+        },
+        "normalizedKey": "SA|eastern province||",
+        "point": {
+          "lat": 24,
+          "lon": 49.75
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Multiple Areas, Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 145.6354940000001,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Saudi Arabia"
+        },
+        "confidence": 0.9959536314271135,
+        "flags": {
+          "multiArea": true
+        },
+        "granularity": "multi",
+        "input": {
+          "raw": "Multiple Areas, Saudi Arabia"
+        },
+        "normalizedKey": "SA|||multi",
+        "point": {
+          "lat": 25,
+          "lon": 45
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Saudi Arabia",
+      "ok": true,
+      "status": 200,
+      "durationMs": 143.55333700000028,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "countryIso2": "SA",
+          "countryName": "Saudi Arabia",
+          "displayName": "Saudi Arabia"
+        },
+        "confidence": 0.9959536314271135,
+        "flags": {},
+        "granularity": "country",
+        "input": {
+          "raw": "Saudi Arabia"
+        },
+        "normalizedKey": "SA|||",
+        "point": {
+          "lat": 25,
+          "lon": 45
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Cairo, Egypt",
+      "ok": true,
+      "status": 200,
+      "durationMs": 157.42851700000028,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Cairo",
+          "city": "Cairo",
+          "countryIso2": "EG",
+          "countryName": "Egypt",
+          "displayName": "Cairo, Cairo, Egypt"
+        },
+        "confidence": 0.9883688011098345,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Cairo, Egypt"
+        },
+        "normalizedKey": "EG||cairo|",
+        "point": {
+          "lat": 30.06263,
+          "lon": 31.24967
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Dubai, United Arab Emirates",
+      "ok": true,
+      "status": 200,
+      "durationMs": 148.51218400000016,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Dubai",
+          "city": "Dubai",
+          "countryIso2": "AE",
+          "countryName": "United Arab Emirates",
+          "displayName": "Dubai, Dubai, United Arab Emirates"
+        },
+        "confidence": 0.9818103786328402,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Dubai, United Arab Emirates"
+        },
+        "normalizedKey": "AE||dubai|",
+        "point": {
+          "lat": 25.07725,
+          "lon": 55.30927
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Istanbul, Turkey",
+      "ok": true,
+      "status": 200,
+      "durationMs": 139.75435600000037,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Istanbul",
+          "city": "Istanbul",
+          "countryIso2": "TR",
+          "countryName": "Türkiye",
+          "displayName": "Istanbul, Istanbul, Türkiye"
+        },
+        "confidence": 0.9918329003868402,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Istanbul, Turkey"
+        },
+        "normalizedKey": "TR||istanbul|",
+        "point": {
+          "lat": 41.01384,
+          "lon": 28.94966
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Paris, France",
+      "ok": true,
+      "status": 200,
+      "durationMs": 150.34614299999976,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Île-de-France",
+          "city": "Paris",
+          "countryIso2": "FR",
+          "countryName": "France",
+          "displayName": "Paris, Île-de-France, France"
+        },
+        "confidence": 0.9777754298330278,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Paris, France"
+        },
+        "normalizedKey": "FR||paris|",
+        "point": {
+          "lat": 48.85341,
+          "lon": 2.3488
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Sao Paulo, Brazil",
+      "ok": true,
+      "status": 200,
+      "durationMs": 147.8709940000008,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "São Paulo",
+          "city": "São Paulo",
+          "countryIso2": "BR",
+          "countryName": "Brazil",
+          "displayName": "São Paulo, São Paulo, Brazil"
+        },
+        "confidence": 0.990168486930734,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "Sao Paulo, Brazil"
+        },
+        "normalizedKey": "BR||sao paulo|",
+        "point": {
+          "lat": -23.5475,
+          "lon": -46.63611
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Springfield, USA",
+      "ok": true,
+      "status": 200,
+      "durationMs": 137.2938690000001,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Missouri",
+          "city": "Springfield",
+          "countryIso2": "US",
+          "countryName": "United States",
+          "displayName": "Springfield, Missouri, United States"
+        },
+        "confidence": 0.9595844495962597,
+        "flags": {
+          "ambiguous": true
+        },
+        "granularity": "city",
+        "input": {
+          "raw": "Springfield, USA"
+        },
+        "normalizedKey": "US||springfield|",
+        "point": {
+          "lat": 37.21533,
+          "lon": -93.29824
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Portland, USA",
+      "ok": true,
+      "status": 200,
+      "durationMs": 139.1393539999999,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "Oregon",
+          "city": "Portland",
+          "countryIso2": "US",
+          "countryName": "United States",
+          "displayName": "Portland, Oregon, United States"
+        },
+        "confidence": 0.9613742590306693,
+        "flags": {
+          "ambiguous": true
+        },
+        "granularity": "city",
+        "input": {
+          "raw": "Portland, USA"
+        },
+        "normalizedKey": "US||portland|",
+        "point": {
+          "lat": 45.52345,
+          "lon": -122.67621
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "San Jose, USA",
+      "ok": true,
+      "status": 200,
+      "durationMs": 154.29336199999943,
+      "response": {
+        "cache": {
+          "hit": true
+        },
+        "canonical": {
+          "admin1": "California",
+          "city": "San Jose",
+          "countryIso2": "US",
+          "countryName": "United States",
+          "displayName": "San Jose, California, United States"
+        },
+        "confidence": 0.9723970451019647,
+        "flags": {},
+        "granularity": "city",
+        "input": {
+          "raw": "San Jose, USA"
+        },
+        "normalizedKey": "US||san jose|",
+        "point": {
+          "lat": 37.33939,
+          "lon": -121.89496
+        },
+        "provider": "geonames"
+      }
+    },
+    {
+      "input": "Columbus, USA",
+      "ok": true,
+      "status": 200,
+      "durationMs": 1612.8049589999991,
+      "response": {
+        "input": {
+          "raw": "Columbus, USA"
+        },
+        "normalizedKey": "US||columbus|",
+        "canonical": {
+          "countryIso2": "US",
+          "countryName": "United States",
+          "displayName": "Columbus, Ohio, United States",
+          "admin1": "Ohio",
+          "city": "Columbus"
+        },
+        "granularity": "city",
+        "confidence": 0.9665411466920845,
+        "flags": {
+          "ambiguous": true
+        },
+        "provider": "geonames",
+        "cache": {
+          "hit": false
+        },
+        "point": {
+          "lat": 39.96118,
+          "lon": -82.99879
+        }
+      }
+    },
+    {
+      "input": "Jackson, USA",
+      "ok": true,
+      "status": 200,
+      "durationMs": 608.0213289999992,
+      "response": {
+        "input": {
+          "raw": "Jackson, USA"
+        },
+        "normalizedKey": "US||jackson|",
+        "canonical": {
+          "countryIso2": "US",
+          "countryName": "United States",
+          "displayName": "Jackson, Mississippi, United States",
+          "admin1": "Mississippi",
+          "city": "Jackson"
+        },
+        "granularity": "city",
+        "confidence": 0.9562818907085153,
+        "flags": {
+          "ambiguous": true
+        },
+        "provider": "geonames",
+        "cache": {
+          "hit": false
+        },
+        "point": {
+          "lat": 32.29876,
+          "lon": -90.18481
+        }
+      }
+    },
+    {
+      "input": "Salem, USA",
+      "ok": true,
+      "status": 200,
+      "durationMs": 546.6715870000007,
+      "response": {
+        "input": {
+          "raw": "Salem, USA"
+        },
+        "normalizedKey": "US||salem|",
+        "canonical": {
+          "countryIso2": "US",
+          "countryName": "United States",
+          "displayName": "Salem, Oregon, United States",
+          "admin1": "Oregon",
+          "city": "Salem"
+        },
+        "granularity": "city",
+        "confidence": 0.9551771784970342,
+        "flags": {
+          "ambiguous": true
+        },
+        "provider": "geonames",
+        "cache": {
+          "hit": false
+        },
+        "point": {
+          "lat": 44.9429,
+          "lon": -123.0351
+        }
+      }
+    }
+  ]
+}
