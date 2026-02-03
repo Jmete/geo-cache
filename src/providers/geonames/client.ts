@@ -81,7 +81,7 @@ async function fetchGeoNames(
   config: GeoNamesConfig
 ): Promise<GeoNamesSearchResult[]> {
   const { username, timeout = DEFAULT_TIMEOUT_MS } = config;
-  const url = buildGeoNamesUrl(params, username);
+  const url = buildGeoNamesUrl({ inclBbox: 'true', ...params }, username);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);

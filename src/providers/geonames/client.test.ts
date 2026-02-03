@@ -110,6 +110,7 @@ describe('searchCountryPCLI', () => {
       expect(calledUrl).toContain('secure.geonames.org/searchJSON');
       expect(calledUrl).toContain('q=Test+Query');
       expect(calledUrl).toContain('featureCode=PCLI');
+      expect(calledUrl).toContain('inclBbox=true');
       expect(calledUrl).toContain('maxRows=1');
       expect(calledUrl).toContain('username=myusername');
     });
@@ -240,6 +241,7 @@ describe('searchAdmin1', () => {
     expect(calledUrl).toContain('featureClass=A');
     expect(calledUrl).toContain('featureCode=ADM1');
     expect(calledUrl).toContain('fuzzy=0.8');
+    expect(calledUrl).toContain('inclBbox=true');
     expect(calledUrl).toContain('maxRows=10');
     expect(calledUrl).toContain('username=testuser');
   });

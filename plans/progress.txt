@@ -406,3 +406,9 @@
 - Decisions: keep IDs in GitHub Variables; wrangler.toml remains gitignored; CI renders from wrangler.toml.template
 - Files: docs/runbook.md, plans/progress.txt
 - Notes: none
+
+## GeoNames - Force bbox inclusion in searchJSON [NON-PRD]
+- Task: add inclBbox=true to GeoNames searchJSON requests so bbox returns when available
+- Decisions: set inclBbox at client fetch layer so all search modes inherit; no API surface changes
+- Files: src/providers/geonames/client.ts, src/providers/geonames/client.test.ts, src/providers/geonames/provider.test.ts
+- Notes: none

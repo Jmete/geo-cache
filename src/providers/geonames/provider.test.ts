@@ -53,6 +53,7 @@ describe('GeoNamesProvider (city search)', () => {
     expect(calledUrl).toContain('country=SA');
     expect(calledUrl).toContain('featureClass=P');
     expect(calledUrl).toContain('fuzzy=0.8');
+    expect(calledUrl).toContain('inclBbox=true');
     expect(calledUrl).toContain('maxRows=10');
 
     const fetchOptions = mockFetch.mock.calls[0]?.[1] as { signal?: AbortSignal };
@@ -100,8 +101,10 @@ describe('GeoNamesProvider (city search)', () => {
     const strictUrl = mockFetch.mock.calls[0]?.[0] as string;
     const fallbackUrl = mockFetch.mock.calls[1]?.[0] as string;
     expect(strictUrl).toContain('featureClass=P');
+    expect(strictUrl).toContain('inclBbox=true');
     expect(fallbackUrl).not.toContain('featureClass=P');
     expect(fallbackUrl).toContain('fuzzy=1');
+    expect(fallbackUrl).toContain('inclBbox=true');
     expect(result.usedFallback).toBe(true);
     expect(result.candidates).toHaveLength(1);
   });
@@ -213,6 +216,7 @@ describe('GeoNamesProvider (region search)', () => {
     expect(calledUrl).toContain('featureClass=A');
     expect(calledUrl).toContain('featureCode=ADM1');
     expect(calledUrl).toContain('fuzzy=0.8');
+    expect(calledUrl).toContain('inclBbox=true');
     expect(calledUrl).toContain('maxRows=10');
   });
 
@@ -257,7 +261,9 @@ describe('GeoNamesProvider (region search)', () => {
     const strictUrl = mockFetch.mock.calls[0]?.[0] as string;
     const fallbackUrl = mockFetch.mock.calls[1]?.[0] as string;
     expect(strictUrl).toContain('featureCode=ADM1');
+    expect(strictUrl).toContain('inclBbox=true');
     expect(fallbackUrl).not.toContain('featureCode=ADM1');
+    expect(fallbackUrl).toContain('inclBbox=true');
     expect(result.usedFallback).toBe(true);
     expect(result.candidates).toHaveLength(1);
   });
@@ -335,6 +341,7 @@ describe('GeoNamesProvider (country search)', () => {
     expect(calledUrl).toContain('secure.geonames.org/searchJSON');
     expect(calledUrl).toContain('q=Saudi+Arabia');
     expect(calledUrl).toContain('featureCode=PCLI');
+    expect(calledUrl).toContain('inclBbox=true');
     expect(calledUrl).toContain('maxRows=1');
   });
 
@@ -370,6 +377,7 @@ describe('GeoNamesProvider (country search)', () => {
     expect(calledUrl).toContain('secure.geonames.org/searchJSON');
     expect(calledUrl).toContain('q=Saudi+Arabia');
     expect(calledUrl).toContain('featureCode=PCLI');
+    expect(calledUrl).toContain('inclBbox=true');
     expect(calledUrl).toContain('maxRows=1');
     expect(result.candidates).toHaveLength(1);
     const candidate = result.candidates[0];
