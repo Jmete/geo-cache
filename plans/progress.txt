@@ -382,3 +382,9 @@
 - Decisions: use wrangler d1 execute for inserts/updates; require API_KEY_HMAC_SECRET env; default db name geo-cache-db; support --env and --remote flags
 - Files: scripts/issue-api-key.mjs, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F049 - Tiered Auth + Rate Limit Tests [COMPLETE]
+- Task completed: added integration tests for tier-based limiter selection and revoked/invalid key handling
+- Decisions: use KV-stored tiers for demo/scale and D1 lookup for revoked keys; validate limiter call routing via counters
+- Files: src/integration/rate-limit.test.ts, plans/prd.json, plans/progress.txt
+- Notes: none

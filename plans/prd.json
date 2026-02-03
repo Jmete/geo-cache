@@ -854,7 +854,7 @@
         "Verify valid keys attach the correct tier and use the correct limiter binding.",
         "Trigger the demo/basic/pro limit (1 per 10s) and the scale limit (60 per 60s) and verify 429 behavior."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "high",
       "owner": "qa"
     },
