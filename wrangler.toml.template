@@ -41,7 +41,7 @@ name = "GEOCODE_RATE_LIMITER_DEMO"
 namespace_id = "__RATE_LIMIT_NAMESPACE_ID_DEMO__"
 
 [ratelimits.simple]
-limit = 1
+limit = 20
 period = 10
 
 [[ratelimits]]
@@ -65,5 +65,5 @@ name = "GEOCODE_RATE_LIMITER_SCALE"
 namespace_id = "__RATE_LIMIT_NAMESPACE_ID_SCALE__"
 
 [ratelimits.simple]
-limit = 60
-period = 60
+limit = 100
+period = 10
