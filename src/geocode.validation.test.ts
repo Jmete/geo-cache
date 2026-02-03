@@ -1,18 +1,43 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { ExecutionContext } from 'hono';
 import app from './index';
 import type { Env } from './env.d';
+import { hashApiKey } from './auth/api-keys';
 
-const baseEnv: Env = {
-  ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
-  API_KEY: 'test-api-key',
-  GEONAMES_USERNAME: 'test-geonames',
-  GEOCODE_RATE_LIMITER: {
-    limit: async () => ({ success: true }),
-  },
-  DB: {} as D1Database,
-  GEO_KV: {} as KVNamespace,
-};
+const apiKey = 'test-api-key';
+const apiSecret = 'test-hmac-secret';
+let keyHash = '';
+
+beforeAll(async () => {
+  keyHash = await hashApiKey(apiKey, apiSecret);
+});
+
+function createMockKv() {
+  const store = new Map<string, string>();
+  store.set(
+    `api_key:${keyHash}`,
+    JSON.stringify({ tier: 'basic', status: 'active' })
+  );
+  return {
+    get: async (key: string, _type?: 'text') => store.get(key) ?? null,
+    put: async (key: string, value: string) => {
+      store.set(key, value);
+    },
+  } as KVNamespace;
+}
+
+function createEnv(): Env {
+  return {
+    ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
+    API_KEY_HMAC_SECRET: apiSecret,
+    GEONAMES_USERNAME: 'test-geonames',
+    GEOCODE_RATE_LIMITER: {
+      limit: async () => ({ success: true }),
+    },
+    DB: {} as D1Database,
+    GEO_KV: createMockKv(),
+  };
+}
 
 const ctx: ExecutionContext = {
   waitUntil() {},
@@ -26,12 +51,12 @@ describe('geocode request validation', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': 'test-api-key',
+        'x-api-key': apiKey,
       },
       body: '{"text":',
     });
 
-    const res = await app.fetch(req, baseEnv, ctx);
+    const res = await app.fetch(req, createEnv(), ctx);
     const payload = await res.json();
 
     expect(res.status).toBe(400);
@@ -48,12 +73,12 @@ describe('geocode request validation', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': 'test-api-key',
+        'x-api-key': apiKey,
       },
       body: JSON.stringify({ text: '' }),
     });
 
-    const res = await app.fetch(req, baseEnv, ctx);
+    const res = await app.fetch(req, createEnv(), ctx);
     const payload = await res.json();
 
     expect(res.status).toBe(400);
@@ -71,12 +96,12 @@ describe('geocode request validation', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': 'test-api-key',
+        'x-api-key': apiKey,
       },
       body: JSON.stringify({ text: longText }),
     });
 
-    const res = await app.fetch(req, baseEnv, ctx);
+    const res = await app.fetch(req, createEnv(), ctx);
     const payload = await res.json();
 
     expect(res.status).toBe(400);
@@ -95,11 +120,11 @@ describe('geocode request validation', () => {
     const req = new Request('https://api.geocache.dev/v1/geocode', {
       method: 'GET',
       headers: {
-        'x-api-key': 'test-api-key',
+        'x-api-key': apiKey,
       },
     });
 
-    const res = await app.fetch(req, baseEnv, ctx);
+    const res = await app.fetch(req, createEnv(), ctx);
     const payload = await res.json();
 
     expect(res.status).toBe(405);

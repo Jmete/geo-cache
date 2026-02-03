@@ -42,8 +42,8 @@ export interface Env {
   /** GeoNames API username */
   GEONAMES_USERNAME: string;
 
-  /** API key for authenticating requests */
-  API_KEY: string;
+  /** HMAC secret used to hash API keys for lookup */
+  API_KEY_HMAC_SECRET: string;
 }
 
 /**

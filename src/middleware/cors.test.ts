@@ -5,7 +5,7 @@ import type { Env } from '../env.d';
 
 const baseEnv: Env = {
   ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
-  API_KEY: 'test-api-key',
+  API_KEY_HMAC_SECRET: 'test-hmac-secret',
   GEONAMES_USERNAME: 'test-geonames',
   GEOCODE_RATE_LIMITER: {
     limit: async () => ({ success: true }),

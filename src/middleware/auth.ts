@@ -1,36 +1,25 @@
 import type { MiddlewareHandler } from 'hono';
 import { internalError, invalidApiKeyError, missingApiKeyError } from '../errors';
 import type { AppBindings } from '../types/app';
-
-const encoder = new TextEncoder();
-
-export function timingSafeEqual(a: string, b: string): boolean {
-  const aBytes = encoder.encode(a);
-  const bBytes = encoder.encode(b);
-  const maxLen = Math.max(aBytes.length, bBytes.length);
-  let diff = aBytes.length ^ bBytes.length;
-
-  for (let i = 0; i < maxLen; i += 1) {
-    const aByte = i < aBytes.length ? (aBytes[i] ?? 0) : 0;
-    const bByte = i < bBytes.length ? (bBytes[i] ?? 0) : 0;
-    diff |= aByte ^ bByte;
-  }
-
-  return diff === 0;
-}
+import {
+  hashApiKey,
+  readApiKeyFromD1,
+  readApiKeyFromKv,
+  writeApiKeyToKv,
+} from '../auth/api-keys';
 
 export const authMiddleware: MiddlewareHandler<AppBindings> = async (
   c,
   next
 ) => {
   const logger = c.get('logger');
-  const expectedKey = c.env.API_KEY;
+  const secret = c.env.API_KEY_HMAC_SECRET;
 
-  if (!expectedKey) {
+  if (!secret) {
     logger.error('request.error', {
       category: 'internal',
       status: 500,
-      reason: 'api_key_missing',
+      reason: 'api_key_hmac_secret_missing',
     });
     return c.json(internalError(), 500);
   }
@@ -46,14 +35,48 @@ export const authMiddleware: MiddlewareHandler<AppBindings> = async (
     return c.json(missingApiKeyError(), 401);
   }
 
-  if (!timingSafeEqual(providedKey, expectedKey)) {
-    logger.warn('request.error', {
-      category: 'auth',
-      status: 401,
-      reason: 'invalid_api_key',
+  let keyHash: string;
+  try {
+    keyHash = await hashApiKey(providedKey, secret);
+  } catch (error) {
+    logger.error('request.error', {
+      category: 'internal',
+      status: 500,
+      reason: 'api_key_hash_failed',
+      errorType: error instanceof Error ? error.name : 'UnknownError',
     });
-    return c.json(invalidApiKeyError(), 401);
+    return c.json(internalError(), 500);
   }
 
-  await next();
+  try {
+    const cached = await readApiKeyFromKv(c.env.GEO_KV, keyHash);
+    if (cached?.status === 'active') {
+      c.set('apiKeyTier', cached.tier);
+      await next();
+      return;
+    }
+
+    const record = await readApiKeyFromD1(c.env.DB, keyHash);
+    if (record?.status === 'active') {
+      await writeApiKeyToKv(c.env.GEO_KV, keyHash, record);
+      c.set('apiKeyTier', record.tier);
+      await next();
+      return;
+    }
+  } catch (error) {
+    logger.error('request.error', {
+      category: 'internal',
+      status: 500,
+      reason: 'api_key_lookup_failed',
+      errorType: error instanceof Error ? error.name : 'UnknownError',
+    });
+    return c.json(internalError(), 500);
+  }
+
+  logger.warn('request.error', {
+    category: 'auth',
+    status: 401,
+    reason: 'invalid_api_key',
+  });
+  return c.json(invalidApiKeyError(), 401);
 };

@@ -364,3 +364,9 @@
 - Decisions: store only key hashes; added tier/status check constraints and tier+status index for admin queries
 - Files: migrations/0003_create_api_keys.sql, src/db/schema.ts, src/db/migrations.test.ts, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F046 - Multi-Key Auth with KV Cache [COMPLETE]
+- Task completed: replaced single-key auth with HMAC-hashed lookup via KV cache + D1; tier stored on request context
+- Decisions: use API_KEY_HMAC_SECRET; cache active key hashes in GEO_KV with api_key: prefix and 60s TTL; treat non-active as invalid
+- Files: src/auth/api-keys.ts, src/middleware/auth.ts, src/types/app.ts, src/env.d.ts, src/middleware/auth.test.ts, src/geocode.validation.test.ts, src/middleware/cors.test.ts, src/integration/security.test.ts, src/integration/geocode.test.ts, plans/prd.json, plans/progress.txt
+- Notes: none

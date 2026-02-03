@@ -803,7 +803,7 @@
         "Lookup key_hash in KV cache first, then D1; cache positive results with short TTL.",
         "Reject missing/invalid/revoked keys with 401; never log raw keys or hashes; attach tier to request context for rate limiting."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "high",
       "owner": "security"
     },

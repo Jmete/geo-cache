@@ -1,11 +1,26 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach, beforeAll } from 'vitest';
 import type { ExecutionContext } from 'hono';
 import type { Env } from '../env.d';
 import type { GeocodeResponse } from '../types/api';
 import app from '../index';
+import { hashApiKey } from '../auth/api-keys';
 
-function createMockKv() {
+const apiKey = 'test-api-key';
+const apiSecret = 'test-hmac-secret';
+let keyHash = '';
+
+beforeAll(async () => {
+  keyHash = await hashApiKey(apiKey, apiSecret);
+});
+
+function createMockKv(includeApiKey = false) {
   const store = new Map<string, string>();
+  if (includeApiKey) {
+    store.set(
+      `api_key:${keyHash}`,
+      JSON.stringify({ tier: 'basic', status: 'active' })
+    );
+  }
   const kv = {
     get: async (key: string, _type?: 'text') => store.get(key) ?? null,
     put: async (key: string, value: string) => {
@@ -20,6 +35,11 @@ function createMockD1() {
   const db = {
     prepare: (sql: string) => ({
       bind: () => {
+        if (sql.includes('SELECT') && sql.includes('api_keys')) {
+          return {
+            first: async <T>() => null as T | null,
+          };
+        }
         if (sql.includes('SELECT') && sql.includes('geocode_cache')) {
           return {
             first: async <T>() => null as T | null,
@@ -35,12 +55,15 @@ function createMockD1() {
   return db;
 }
 
-function createEnv(options?: { rateLimitSuccess?: boolean }): Env {
-  const { kv } = createMockKv();
+function createEnv(options?: {
+  rateLimitSuccess?: boolean;
+  includeApiKey?: boolean;
+}): Env {
+  const { kv } = createMockKv(options?.includeApiKey);
   const db = createMockD1();
   return {
     ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
-    API_KEY: 'test-api-key',
+    API_KEY_HMAC_SECRET: apiSecret,
     GEONAMES_USERNAME: 'test-geonames',
     GEOCODE_RATE_LIMITER: {
       limit: async () => ({ success: options?.rateLimitSuccess ?? true }),
@@ -131,10 +154,10 @@ describe('F040: security controls', () => {
   });
 
   it('returns 429 and skips provider calls when rate limited', async () => {
-    const env = createEnv({ rateLimitSuccess: false });
+    const env = createEnv({ rateLimitSuccess: false, includeApiKey: true });
     const req = createRequest({
       origin: 'https://allowed.example',
-      apiKey: 'test-api-key',
+      apiKey,
       body: { text: 'Riyadh, Saudi Arabia' },
     });
 
@@ -177,10 +200,10 @@ describe('F040: security controls', () => {
         }),
     } as Response);
 
-    const env = createEnv();
+    const env = createEnv({ includeApiKey: true });
     const req = createRequest({
       origin: 'https://allowed.example',
-      apiKey: 'test-api-key',
+      apiKey,
       body: { text: 'Riyadh, Saudi Arabia' },
     });
 

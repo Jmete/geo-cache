@@ -1,9 +1,18 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
 import type { ExecutionContext } from 'hono';
 import type { GeocodeCacheRow } from '../db/schema';
 import type { Env } from '../env.d';
 import type { GeocodeResponse } from '../types/api';
 import app from '../index';
+import { hashApiKey } from '../auth/api-keys';
+
+const apiKey = 'test-api-key';
+const apiSecret = 'test-hmac-secret';
+let keyHash = '';
+
+beforeAll(async () => {
+  keyHash = await hashApiKey(apiKey, apiSecret);
+});
 
 function createMockKv(initial?: Map<string, string>) {
   const store = initial ?? new Map<string, string>();
@@ -36,10 +45,16 @@ function createMockD1(initial?: Map<string, GeocodeCacheRow>) {
     prepare: (sql: string) => {
       return {
         bind: (...bindings: unknown[]) => {
-          if (sql.includes('SELECT') && sql.includes('geocode_cache')) {
-            return {
-              first: async <T>() => {
-                captured.selectCount += 1;
+        if (sql.includes('SELECT') && sql.includes('api_keys')) {
+          return {
+            first: async <T>() => null as T | null,
+          };
+        }
+
+        if (sql.includes('SELECT') && sql.includes('geocode_cache')) {
+          return {
+            first: async <T>() => {
+              captured.selectCount += 1;
                 const key = bindings[0] as string;
                 return (rows.get(key) ?? null) as T | null;
               },
@@ -126,7 +141,7 @@ function createMockD1(initial?: Map<string, GeocodeCacheRow>) {
 function createEnv(kv: KVNamespace, db: D1Database): Env {
   return {
     ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
-    API_KEY: 'test-api-key',
+    API_KEY_HMAC_SECRET: apiSecret,
     GEONAMES_USERNAME: 'test-geonames',
     GEOCODE_RATE_LIMITER: {
       limit: async () => ({ success: true }),
@@ -148,7 +163,7 @@ function createRequest(text: string): Request {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': 'test-api-key',
+      'x-api-key': apiKey,
     },
     body: JSON.stringify({ text }),
   });
@@ -186,7 +201,12 @@ describe('F038: /v1/geocode cache integration', () => {
         }),
     } as Response);
 
-    const { kv, store: kvStore } = createMockKv();
+    const initialKv = new Map<string, string>();
+    initialKv.set(
+      `api_key:${keyHash}`,
+      JSON.stringify({ tier: 'basic', status: 'active' })
+    );
+    const { kv, store: kvStore } = createMockKv(initialKv);
     const { db, captured: d1Captured } = createMockD1();
     const env = createEnv(kv, db);
 
@@ -218,6 +238,10 @@ describe('F038: /v1/geocode cache integration', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     kvStore.clear();
+    kvStore.set(
+      `api_key:${keyHash}`,
+      JSON.stringify({ tier: 'basic', status: 'active' })
+    );
 
     const thirdResponse = await app.fetch(
       createRequest('Riyadh, Saudi Arabia'),
