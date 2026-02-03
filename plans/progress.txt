@@ -376,3 +376,9 @@
 - Decisions: default to basic tier if missing; updated wrangler.toml + example with per-tier ratelimits and placeholder namespace IDs
 - Files: src/index.ts, src/env.d.ts, wrangler.toml, wrangler.toml.example, src/geocode.validation.test.ts, src/middleware/auth.test.ts, src/middleware/cors.test.ts, src/integration/security.test.ts, src/integration/geocode.test.ts, plans/prd.json, plans/progress.txt
 - Notes: zone-level WAF rate limit should be above highest tier to avoid unintended caps
+
+## F048 - API Key Issuance Script [COMPLETE]
+- Task completed: added CLI script to issue, revoke, and rotate API keys with HMAC hashing and D1 inserts
+- Decisions: use wrangler d1 execute for inserts/updates; require API_KEY_HMAC_SECRET env; default db name geo-cache-db; support --env and --remote flags
+- Files: scripts/issue-api-key.mjs, plans/prd.json, plans/progress.txt
+- Notes: none

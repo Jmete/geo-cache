@@ -837,7 +837,7 @@
         "Print the plaintext key once on creation; do not store or log it elsewhere.",
         "Support revocation/rotation by updating status and issuing a replacement key."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "fullstack"
     },
