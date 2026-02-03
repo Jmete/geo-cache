@@ -820,7 +820,7 @@
         "Configure demo/basic/pro limits to 1 request / 10 seconds and scale to 60 / 60 seconds.",
         "Select the correct limiter by key tier; ensure /health remains unthrottled and 429 returns standard error JSON."
       ],
-      "passes": false,
+      "passes": true,
       "notes": "If a Cloudflare WAF/zone-level rate limit remains enabled, set it above the highest tier or it will become the effective ceiling.",
       "risk": "high",
       "owner": "security"

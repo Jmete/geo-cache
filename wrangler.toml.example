@@ -36,12 +36,36 @@ id = "ENTER_ID_HERE"
 preview_id = "ENTER_ID_HERE"
 
 # =============================================================================
-# Worker Rate Limiting (per API key)
+# Worker Rate Limiting (per API key tier)
 # =============================================================================
 
 [[ratelimits]]
-name = "GEOCODE_RATE_LIMITER"
-namespace_id = "1001"
+name = "GEOCODE_RATE_LIMITER_DEMO"
+namespace_id = "ENTER_ID_HERE"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_BASIC"
+namespace_id = "ENTER_ID_HERE"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_PRO"
+namespace_id = "ENTER_ID_HERE"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_SCALE"
+namespace_id = "ENTER_ID_HERE"
 
 [ratelimits.simple]
 limit = 60

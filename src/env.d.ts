@@ -9,8 +9,14 @@ export interface Env {
   // =============================================================================
   // Rate Limiting
   // =============================================================================
-  /** Worker rate limiter binding for per-API-key throttling */
-  GEOCODE_RATE_LIMITER: RateLimit;
+  /** Worker rate limiter binding for demo tier */
+  GEOCODE_RATE_LIMITER_DEMO: RateLimit;
+  /** Worker rate limiter binding for basic tier */
+  GEOCODE_RATE_LIMITER_BASIC: RateLimit;
+  /** Worker rate limiter binding for pro tier */
+  GEOCODE_RATE_LIMITER_PRO: RateLimit;
+  /** Worker rate limiter binding for scale tier */
+  GEOCODE_RATE_LIMITER_SCALE: RateLimit;
 
   // =============================================================================
   // D1 Database

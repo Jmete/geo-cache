@@ -370,3 +370,9 @@
 - Decisions: use API_KEY_HMAC_SECRET; cache active key hashes in GEO_KV with api_key: prefix and 60s TTL; treat non-active as invalid
 - Files: src/auth/api-keys.ts, src/middleware/auth.ts, src/types/app.ts, src/env.d.ts, src/middleware/auth.test.ts, src/geocode.validation.test.ts, src/middleware/cors.test.ts, src/integration/security.test.ts, src/integration/geocode.test.ts, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F047 - Tiered Rate Limiting (Multi-Binding) [COMPLETE]
+- Task completed: added tiered rate limiter bindings and selected limiter based on apiKeyTier; demo/basic/pro 1 per 10s, scale 60 per 60s
+- Decisions: default to basic tier if missing; updated wrangler.toml + example with per-tier ratelimits and placeholder namespace IDs
+- Files: src/index.ts, src/env.d.ts, wrangler.toml, wrangler.toml.example, src/geocode.validation.test.ts, src/middleware/auth.test.ts, src/middleware/cors.test.ts, src/integration/security.test.ts, src/integration/geocode.test.ts, plans/prd.json, plans/progress.txt
+- Notes: zone-level WAF rate limit should be above highest tier to avoid unintended caps

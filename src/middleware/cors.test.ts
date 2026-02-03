@@ -7,7 +7,16 @@ const baseEnv: Env = {
   ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
   API_KEY_HMAC_SECRET: 'test-hmac-secret',
   GEONAMES_USERNAME: 'test-geonames',
-  GEOCODE_RATE_LIMITER: {
+  GEOCODE_RATE_LIMITER_DEMO: {
+    limit: async () => ({ success: true }),
+  },
+  GEOCODE_RATE_LIMITER_BASIC: {
+    limit: async () => ({ success: true }),
+  },
+  GEOCODE_RATE_LIMITER_PRO: {
+    limit: async () => ({ success: true }),
+  },
+  GEOCODE_RATE_LIMITER_SCALE: {
     limit: async () => ({ success: true }),
   },
   DB: {} as D1Database,

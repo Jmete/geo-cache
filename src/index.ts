@@ -17,12 +17,29 @@ import { requestContextMiddleware } from './middleware/request-context';
 import { resolveGeocode } from './geocode';
 import { ProviderFetchError, ProviderTimeoutError } from './providers';
 import type { AppBindings } from './types/app';
+import type { ApiKeyTier } from './db/schema';
+import type { RateLimit, Env } from './env.d';
 
 const app = new Hono<AppBindings>();
 const MAX_TEXT_LENGTH = 512;
 const BASE_ALLOWED_HOSTS = new Set(['api.geocache.dev']);
 const DEV_ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1']);
 const bootTime = Date.now();
+
+function getRateLimiterForTier(env: Env, tier: ApiKeyTier): RateLimit {
+  switch (tier) {
+    case 'demo':
+      return env.GEOCODE_RATE_LIMITER_DEMO;
+    case 'basic':
+      return env.GEOCODE_RATE_LIMITER_BASIC;
+    case 'pro':
+      return env.GEOCODE_RATE_LIMITER_PRO;
+    case 'scale':
+      return env.GEOCODE_RATE_LIMITER_SCALE;
+    default:
+      return env.GEOCODE_RATE_LIMITER_BASIC;
+  }
+}
 
 app.use('*', async (c, next) => {
   const hostname = new URL(c.req.url).hostname;
@@ -46,8 +63,10 @@ app.use('/v1/geocode', async (c, next) => {
 
   const apiKey = c.req.header('x-api-key')?.trim();
   if (apiKey) {
+    const tier = c.get('apiKeyTier') ?? 'basic';
+    const limiter = getRateLimiterForTier(c.env, tier);
     const key = `${apiKey}:POST:/v1/geocode`;
-    const { success } = await c.env.GEOCODE_RATE_LIMITER.limit({ key });
+    const { success } = await limiter.limit({ key });
     if (!success) {
       c.get('logger').warn('request.error', {
         category: 'rate_limit',

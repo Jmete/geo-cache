@@ -61,12 +61,22 @@ function createEnv(options?: {
 }): Env {
   const { kv } = createMockKv(options?.includeApiKey);
   const db = createMockD1();
+  const limiterSuccess = options?.rateLimitSuccess ?? true;
   return {
     ALLOWED_ORIGINS: 'https://allowed.example, https://other.example',
     API_KEY_HMAC_SECRET: apiSecret,
     GEONAMES_USERNAME: 'test-geonames',
-    GEOCODE_RATE_LIMITER: {
-      limit: async () => ({ success: options?.rateLimitSuccess ?? true }),
+    GEOCODE_RATE_LIMITER_DEMO: {
+      limit: async () => ({ success: true }),
+    },
+    GEOCODE_RATE_LIMITER_BASIC: {
+      limit: async () => ({ success: limiterSuccess }),
+    },
+    GEOCODE_RATE_LIMITER_PRO: {
+      limit: async () => ({ success: true }),
+    },
+    GEOCODE_RATE_LIMITER_SCALE: {
+      limit: async () => ({ success: true }),
     },
     DB: db,
     GEO_KV: kv,
