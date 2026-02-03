@@ -8,7 +8,7 @@ troubleshooting for the geo-cache Worker.
 Bindings (wrangler.toml):
 - D1: `DB`
 - KV: `GEO_KV`
-- Rate limiter: `GEOCODE_RATE_LIMITER`
+- Rate limiters: `GEOCODE_RATE_LIMITER_DEMO`, `GEOCODE_RATE_LIMITER_BASIC`, `GEOCODE_RATE_LIMITER_PRO`, `GEOCODE_RATE_LIMITER_SCALE`
 
 Vars (wrangler.toml):
 - `ALLOWED_ORIGINS` (comma-separated list, no spaces)
@@ -17,14 +17,14 @@ Vars (wrangler.toml):
 
 Secrets (wrangler secret put):
 - `GEONAMES_USERNAME`
-- `API_KEY`
+- `API_KEY_HMAC_SECRET`
 
 ## Secrets and variables
 
 Set secrets (per environment):
 ```
 wrangler secret put GEONAMES_USERNAME
-wrangler secret put API_KEY
+wrangler secret put API_KEY_HMAC_SECRET
 ```
 
 Set vars in `wrangler.toml` (or env-specific files):
@@ -56,12 +56,36 @@ wrangler d1 execute geo-cache-db --remote --command="SELECT name FROM sqlite_mas
 ## Rate limiting
 
 The Worker enforces rate limiting for `POST /v1/geocode` using the
-`GEOCODE_RATE_LIMITER` binding. Configure limits per environment in
+per-tier rate limiter bindings. Configure limits per environment in
 `wrangler.toml`:
 ```
 [[ratelimits]]
-name = "GEOCODE_RATE_LIMITER"
-namespace_id = "1001"
+name = "GEOCODE_RATE_LIMITER_DEMO"
+namespace_id = "ENTER_ID_HERE"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_BASIC"
+namespace_id = "ENTER_ID_HERE"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_PRO"
+namespace_id = "ENTER_ID_HERE"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_SCALE"
+namespace_id = "ENTER_ID_HERE"
 
 [ratelimits.simple]
 limit = 60
@@ -74,7 +98,33 @@ Adjust thresholds based on GeoNames quotas and expected traffic.
 
 If you also configure a Cloudflare WAF rate limiting rule, ensure it uses
 `x-api-key` as the key and (when possible) returns the standard 429 JSON
-body to preserve API contract consistency.
+body to preserve API contract consistency. Keep the WAF limit higher than
+your highest tier, or it will become the effective ceiling.
+
+## API key management
+
+API keys are stored as HMAC-SHA256 hashes in D1 (table `api_keys`). Use
+`scripts/issue-api-key.mjs` to issue, revoke, and rotate keys. The script
+requires `API_KEY_HMAC_SECRET` in the environment and uses `wrangler d1 execute`
+to write to D1.
+
+Issue a key:
+```
+API_KEY_HMAC_SECRET=your-secret \
+node scripts/issue-api-key.mjs issue --tier demo --label "landing-page"
+```
+
+Revoke a key:
+```
+API_KEY_HMAC_SECRET=your-secret \
+node scripts/issue-api-key.mjs revoke --key "<plaintext-key>"
+```
+
+Rotate a key:
+```
+API_KEY_HMAC_SECRET=your-secret \
+node scripts/issue-api-key.mjs rotate --key "<plaintext-key>" --tier basic
+```
 
 ## Logs and events
 

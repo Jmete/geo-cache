@@ -872,7 +872,7 @@
         "Document tier limits (demo/basic/pro: 1 per 10s; scale: 60 per 60s) and how to change them.",
         "Document interaction with zone-level WAF rate limits and recommend keeping it above the highest tier."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "low",
       "owner": "devops"
     }

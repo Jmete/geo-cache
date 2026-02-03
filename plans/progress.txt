@@ -388,3 +388,9 @@
 - Decisions: use KV-stored tiers for demo/scale and D1 lookup for revoked keys; validate limiter call routing via counters
 - Files: src/integration/rate-limit.test.ts, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F050 - Multi-Key Auth Documentation [COMPLETE]
+- Task completed: updated runbook for API key issuance/rotation/revocation, new API_KEY_HMAC_SECRET, and tiered rate limits
+- Decisions: document WAF ceiling guidance and include example commands for the issuance script
+- Files: docs/runbook.md, plans/prd.json, plans/progress.txt
+- Notes: none
