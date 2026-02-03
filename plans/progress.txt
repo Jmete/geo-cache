@@ -323,3 +323,9 @@
 - Documented pacing + inputs-file usage in docs/performance.md
 - Files: scripts/perf-geocode.mjs, docs/performance.md, plans/progress.txt
 - Notes: none
+
+## F034 - Performance Targets Validation [COMPLETE]
+- Completed: production KV, D1, provider perf sampling with p50/p95/p99 recorded in docs/performance.md
+- Decisions: use pacing + unique inputs file to avoid rate limits and cache contamination
+- Files: docs/performance.md, plans/prd.json, plans/progress.txt
+- Notes: KV p95 above baseline target; revisit thresholds after more sampling

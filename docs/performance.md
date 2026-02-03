@@ -106,4 +106,4 @@ are ignored.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-02-02 | production | KV | 50 | 95.2 | 102.5 | 109.8 | 49/50 ok; 1x 429 rate limit |
 | 2026-02-03 | production | D1 | 15 | 331.3 | 419.7 | 419.7 | KV cleared each run; D1 hit confirmed |
-| YYYY-MM-DD | local | provider | 50 | | | | |
+| 2026-02-03 | production | provider | 15 | 320.7 | 1178.9 | 1178.9 | unique inputs file; cache misses |

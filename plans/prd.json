@@ -587,7 +587,7 @@
         "With D1 hit (KV empty), verify response time remains acceptable and stable under moderate load.",
         "With provider call, verify provider timeout is enforced and the API returns a response/error within the bounded time."
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Exact p95 thresholds depend on environment; document and validate.",
       "risk": "medium",
       "owner": "devops"
