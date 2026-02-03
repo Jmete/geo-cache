@@ -19,7 +19,7 @@ Secrets (wrangler secret put):
 - `GEONAMES_USERNAME`
 - `API_KEY_HMAC_SECRET`
 
-## Secrets and variables
+## Secrets and variables (Cloudflare)
 
 Set secrets (per environment):
 ```
@@ -27,13 +27,36 @@ wrangler secret put GEONAMES_USERNAME
 wrangler secret put API_KEY_HMAC_SECRET
 ```
 
-Set vars in `wrangler.toml` (or env-specific files):
+Set vars in `wrangler.toml` for local dev only (the file is gitignored):
 ```
 [vars]
 ALLOWED_ORIGINS = "https://app.example.com,https://www.app.example.com"
 # ALLOW_LOCALHOST_HOSTS = "true"  # dev only
 # LOG_GEOCODE_HITS = "true"        # optional
 ```
+
+## CI deploy (GitHub Actions)
+
+The repo commits `wrangler.toml.template`. CI renders it into a temporary
+`wrangler.toml` at deploy time using GitHub Actions Variables. Do not commit
+`wrangler.toml` with IDs.
+
+GitHub Actions Variables (non-secret):
+- `D1_DATABASE_ID`
+- `D1_DATABASE_NAME`
+- `KV_NAMESPACE_ID`
+- `KV_PREVIEW_ID`
+- `RATE_LIMIT_NAMESPACE_ID_DEMO`
+- `RATE_LIMIT_NAMESPACE_ID_BASIC`
+- `RATE_LIMIT_NAMESPACE_ID_PRO`
+- `RATE_LIMIT_NAMESPACE_ID_SCALE`
+- `ALLOWED_ORIGINS`
+- `CLOUDFLARE_ACCOUNT_ID`
+- `ALLOW_LOCALHOST_HOSTS` (optional)
+- `LOG_GEOCODE_HITS` (optional)
+
+GitHub Actions Secrets:
+- `CLOUDFLARE_API_TOKEN`
 
 ## D1 migrations
 
@@ -145,7 +168,9 @@ Event logging (`geocode_events` table):
 ## Troubleshooting
 
 - 401 MISSING_API_KEY / INVALID_API_KEY:
-  - Verify `API_KEY` secret is set and clients send `x-api-key`.
+  - Verify `API_KEY_HMAC_SECRET` is set in Cloudflare.
+  - Verify the API key exists in D1 (`api_keys` table) and is active.
+  - Confirm clients send `x-api-key`.
 - 403 ORIGIN_NOT_ALLOWED:
   - Confirm the Origin is in `ALLOWED_ORIGINS` and has no extra spaces.
 - 429 RATE_LIMITED:

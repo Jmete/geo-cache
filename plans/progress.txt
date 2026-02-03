@@ -400,3 +400,9 @@
 - Decisions: keep IDs out of repo via template placeholders + CI render; require per-tier rate limiter IDs (DEMO/BASIC/PRO/SCALE); treat account ID as variable
 - Files: .github/workflows/deploy.yml, wrangler.toml.template, plans/progress.txt
 - Notes: update GitHub Actions Variables/Secrets to match new names before next deploy
+
+## Docs - Runbook CI deploy variables [NON-PRD]
+- Task: update runbook for CI wrangler.toml template + GitHub Variables/Secrets and API key troubleshooting
+- Decisions: keep IDs in GitHub Variables; wrangler.toml remains gitignored; CI renders from wrangler.toml.template
+- Files: docs/runbook.md, plans/progress.txt
+- Notes: none
