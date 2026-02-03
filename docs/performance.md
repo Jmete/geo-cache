@@ -105,5 +105,5 @@ are ignored.
 | Date | Env | Scenario | Runs | p50 | p95 | p99 | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-02-02 | production | KV | 50 | 95.2 | 102.5 | 109.8 | 49/50 ok; 1x 429 rate limit |
-| YYYY-MM-DD | local | D1 | 50 | | | | |
+| 2026-02-03 | production | D1 | 15 | 331.3 | 419.7 | 419.7 | KV cleared each run; D1 hit confirmed |
 | YYYY-MM-DD | local | provider | 50 | | | | |
