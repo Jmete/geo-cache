@@ -1,0 +1,23 @@
+# Saudi-centric coverage
+Riyadh, Saudi Arabia
+Jeddah, Saudi Arabia
+Dammam, Saudi Arabia
+Mecca, Saudi Arabia
+Medina, Saudi Arabia
+Abha, Saudi Arabia
+Najran Region, Saudi Arabia
+Eastern Province, Saudi Arabia
+Multiple Areas, Saudi Arabia
+Saudi Arabia
+
+# Global coverage
+Cairo, Egypt
+Dubai, United Arab Emirates
+Istanbul, Turkey
+Paris, France
+Sao Paulo, Brazil
+
+# Ambiguous (verify ambiguous flag behavior)
+Springfield, USA
+Portland, USA
+San Jose, USA

@@ -341,3 +341,9 @@
 - Decisions: noted rollback to prior deployment caused Origin not allowed; redeploy resolved, suggesting prior version had allowlist mismatch
 - Files: plans/prd.json, plans/progress.txt
 - Notes: rollback path verified; re-test origin allowlist if rolling back to older builds
+
+## F039 - Live GeoNames Smoke Tests [IN PROGRESS]
+- Added live smoke test runner script + curated inputs (18 entries, 3 ambiguous)
+- Added docs/smoke-tests.md with execution steps + golden output guidance
+- Files: scripts/smoke-geocode.mjs, fixtures/smoke-inputs.txt, docs/smoke-tests.md, plans/progress.txt
+- Notes: live run + golden outputs pending (requires deployed URL + API key)
