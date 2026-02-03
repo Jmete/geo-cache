@@ -677,7 +677,7 @@
         "Include at least 3 ambiguous cases and verify ambiguous flag behavior matches the selected policy.",
         "Store outputs as golden results for regression comparison (acknowledging provider data can change over time)."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "qa"
     },

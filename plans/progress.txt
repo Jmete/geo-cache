@@ -353,3 +353,8 @@
 - Golden output saved: fixtures/smoke-outputs/smoke-outputs-20260203.json
 - Files: fixtures/smoke-outputs/smoke-outputs-20260203.json, plans/prd.json, plans/progress.txt
 - Notes: some responses were cache hits; ambiguous coverage satisfied
+
+## F039 - Live GeoNames Smoke Tests [PRD PASS FLAG UPDATED]
+- Updated plans/prd.json passes=true after completed live run on 2026-02-03
+- Files: plans/prd.json, plans/progress.txt
+- Notes: no code changes; status sync only
