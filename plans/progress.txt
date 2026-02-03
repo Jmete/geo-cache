@@ -394,3 +394,9 @@
 - Decisions: document WAF ceiling guidance and include example commands for the issuance script
 - Files: docs/runbook.md, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## DevOps - Deploy workflow hardening + wrangler.toml template [NON-PRD]
+- Task: use wrangler.toml.template in CI, guard workflow_run to push+same repo, add concurrency, move non-secret IDs to GitHub Variables
+- Decisions: keep IDs out of repo via template placeholders + CI render; require per-tier rate limiter IDs (DEMO/BASIC/PRO/SCALE); treat account ID as variable
+- Files: .github/workflows/deploy.yml, wrangler.toml.template, plans/progress.txt
+- Notes: update GitHub Actions Variables/Secrets to match new names before next deploy

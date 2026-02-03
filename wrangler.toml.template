@@ -1,0 +1,69 @@
+# Cloudflare Worker Configuration
+# See: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "geo-cache"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# =============================================================================
+# Environment Variables (non-secret)
+# =============================================================================
+
+[vars]
+ALLOWED_ORIGINS = "__ALLOWED_ORIGINS__"
+__OPTIONAL_VARS__
+
+# =============================================================================
+# D1 Database Binding
+# =============================================================================
+
+[[d1_databases]]
+binding = "DB"
+database_name = "__D1_DATABASE_NAME__"
+database_id = "__D1_DATABASE_ID__"
+
+# =============================================================================
+# KV Namespace Binding (Hot Cache)
+# =============================================================================
+
+[[kv_namespaces]]
+binding = "GEO_KV"
+id = "__KV_NAMESPACE_ID__"
+preview_id = "__KV_PREVIEW_ID__"
+
+# =============================================================================
+# Worker Rate Limiting (per API key tier)
+# =============================================================================
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_DEMO"
+namespace_id = "__RATE_LIMIT_NAMESPACE_ID_DEMO__"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_BASIC"
+namespace_id = "__RATE_LIMIT_NAMESPACE_ID_BASIC__"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_PRO"
+namespace_id = "__RATE_LIMIT_NAMESPACE_ID_PRO__"
+
+[ratelimits.simple]
+limit = 1
+period = 10
+
+[[ratelimits]]
+name = "GEOCODE_RATE_LIMITER_SCALE"
+namespace_id = "__RATE_LIMIT_NAMESPACE_ID_SCALE__"
+
+[ratelimits.simple]
+limit = 60
+period = 60
