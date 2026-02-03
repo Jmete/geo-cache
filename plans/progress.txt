@@ -329,3 +329,9 @@
 - Decisions: use pacing + unique inputs file to avoid rate limits and cache contamination
 - Files: docs/performance.md, plans/prd.json, plans/progress.txt
 - Notes: KV p95 above baseline target; revisit thresholds after more sampling
+
+## F040 - Security Controls Validation [COMPLETE]
+- Task completed: added integration tests covering allowed origin + API key success, missing API key with allowed origin, disallowed origin w/o CORS, rate limit 429 and no provider call
+- Decisions: lightweight KV/D1 stubs + mocked fetch to keep tests deterministic
+- Files: src/integration/security.test.ts, plans/prd.json, plans/progress.txt
+- Notes: none

@@ -696,7 +696,7 @@
         "Verify allowed origin + valid API key succeeds; disallowed origin fails in browser context (CORS blocked).",
         "Trigger rate limit and verify 429 with standard error JSON and no provider calls being made when already limited."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "high",
       "owner": "security"
     },
