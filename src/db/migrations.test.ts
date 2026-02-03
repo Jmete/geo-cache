@@ -101,6 +101,41 @@ describe('D1 Migrations', () => {
     });
   });
 
+  describe('0003_create_api_keys.sql', () => {
+    const sql = readFileSync(join(MIGRATIONS_DIR, '0003_create_api_keys.sql'), 'utf-8');
+
+    it('uses CREATE TABLE IF NOT EXISTS for idempotency', () => {
+      expect(sql).toContain('CREATE TABLE IF NOT EXISTS api_keys');
+    });
+
+    it('uses CREATE INDEX IF NOT EXISTS for idempotency', () => {
+      expect(sql).toContain('CREATE INDEX IF NOT EXISTS');
+    });
+
+    it('has required columns', () => {
+      const requiredColumns = [
+        'key_hash',
+        'tier',
+        'status',
+        'label',
+        'created_at',
+        'last_used_at',
+      ];
+      requiredColumns.forEach((col) => {
+        expect(sql).toContain(col);
+      });
+    });
+
+    it('has tier and status check constraints', () => {
+      expect(sql).toContain("CHECK (tier IN ('demo', 'basic', 'pro', 'scale'))");
+      expect(sql).toContain("CHECK (status IN ('active', 'revoked'))");
+    });
+
+    it('has index on tier and status', () => {
+      expect(sql).toContain('idx_api_keys_tier_status');
+    });
+  });
+
   describe('all migrations', () => {
     migrationFiles.forEach((file) => {
       describe(file, () => {

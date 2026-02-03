@@ -358,3 +358,9 @@
 - Updated plans/prd.json passes=true after completed live run on 2026-02-03
 - Files: plans/prd.json, plans/progress.txt
 - Notes: no code changes; status sync only
+
+## F045 - API Key Registry (D1) [COMPLETE]
+- Task completed: added api_keys table migration + schema types for tiered key registry (demo/basic/pro/scale, active/revoked)
+- Decisions: store only key hashes; added tier/status check constraints and tier+status index for admin queries
+- Files: migrations/0003_create_api_keys.sql, src/db/schema.ts, src/db/migrations.test.ts, plans/prd.json, plans/progress.txt
+- Notes: none

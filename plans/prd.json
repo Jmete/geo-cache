@@ -773,6 +773,108 @@
       "passes": true,
       "risk": "low",
       "owner": "devops"
+    },
+    {
+      "id": "F045",
+      "category": "data",
+      "description": "Add a D1-backed API key registry to support multiple customer/app keys with tiers.",
+      "dependencies": [
+        "F006"
+      ],
+      "steps": [
+        "Create a new migration for `api_keys` with: key_hash (unique), tier (demo/basic/pro/scale), status (active/revoked), label, created_at, last_used_at.",
+        "Verify no plaintext API keys are stored; only hashes are persisted in D1.",
+        "Add indexes for key_hash and (optionally) tier/status for admin queries."
+      ],
+      "passes": true,
+      "risk": "medium",
+      "owner": "data"
+    },
+    {
+      "id": "F046",
+      "category": "security",
+      "description": "Replace single-key auth with multi-key lookup using hashed keys and KV cache.",
+      "dependencies": [
+        "F045",
+        "F010"
+      ],
+      "steps": [
+        "Introduce `API_KEY_HMAC_SECRET` and compute HMAC-SHA256 of incoming `x-api-key` before lookup.",
+        "Lookup key_hash in KV cache first, then D1; cache positive results with short TTL.",
+        "Reject missing/invalid/revoked keys with 401; never log raw keys or hashes; attach tier to request context for rate limiting."
+      ],
+      "passes": false,
+      "risk": "high",
+      "owner": "security"
+    },
+    {
+      "id": "F047",
+      "category": "security",
+      "description": "Implement tiered rate limiting using multi-binding rate limiters.",
+      "dependencies": [
+        "F046",
+        "F012"
+      ],
+      "steps": [
+        "Add per-tier rate limiter bindings: GEOCODE_RATE_LIMITER_DEMO, _BASIC, _PRO, _SCALE.",
+        "Configure demo/basic/pro limits to 1 request / 10 seconds and scale to 60 / 60 seconds.",
+        "Select the correct limiter by key tier; ensure /health remains unthrottled and 429 returns standard error JSON."
+      ],
+      "passes": false,
+      "notes": "If a Cloudflare WAF/zone-level rate limit remains enabled, set it above the highest tier or it will become the effective ceiling.",
+      "risk": "high",
+      "owner": "security"
+    },
+    {
+      "id": "F048",
+      "category": "functional",
+      "description": "Add a local key issuance script for creating and managing tiered API keys.",
+      "dependencies": [
+        "F045"
+      ],
+      "steps": [
+        "Create a script that generates a cryptographically random API key, hashes it, and inserts into D1 with tier/status/label.",
+        "Print the plaintext key once on creation; do not store or log it elsewhere.",
+        "Support revocation/rotation by updating status and issuing a replacement key."
+      ],
+      "passes": false,
+      "risk": "medium",
+      "owner": "fullstack"
+    },
+    {
+      "id": "F049",
+      "category": "testing",
+      "description": "Add tests for multi-key auth, tier lookup, and tier-specific rate limiting.",
+      "dependencies": [
+        "F046",
+        "F047"
+      ],
+      "steps": [
+        "Verify missing/invalid/revoked keys return 401 with standard error JSON.",
+        "Verify valid keys attach the correct tier and use the correct limiter binding.",
+        "Trigger the demo/basic/pro limit (1 per 10s) and the scale limit (60 per 60s) and verify 429 behavior."
+      ],
+      "passes": false,
+      "risk": "high",
+      "owner": "qa"
+    },
+    {
+      "id": "F050",
+      "category": "documentation",
+      "description": "Document API key management, tier limits, and operational guidance for multi-key auth.",
+      "dependencies": [
+        "F046",
+        "F047",
+        "F048"
+      ],
+      "steps": [
+        "Update runbook with key issuance, rotation, and revocation steps and new secret `API_KEY_HMAC_SECRET`.",
+        "Document tier limits (demo/basic/pro: 1 per 10s; scale: 60 per 60s) and how to change them.",
+        "Document interaction with zone-level WAF rate limits and recommend keeping it above the highest tier."
+      ],
+      "passes": false,
+      "risk": "low",
+      "owner": "devops"
     }
   ]
 }

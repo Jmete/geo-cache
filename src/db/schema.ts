@@ -108,6 +108,37 @@ export interface GeocodeEventInsert {
 }
 
 // =============================================================================
+// api_keys Table
+// =============================================================================
+
+export type ApiKeyTier = 'demo' | 'basic' | 'pro' | 'scale';
+export type ApiKeyStatus = 'active' | 'revoked';
+
+/**
+ * Row type for api_keys table (as stored in D1)
+ */
+export interface ApiKeyRow {
+  id: number;
+  key_hash: string;
+  tier: ApiKeyTier;
+  status: ApiKeyStatus;
+  label: string | null;
+  created_at: string;
+  last_used_at: string | null;
+}
+
+/**
+ * Insert type for api_keys (excludes auto-generated fields)
+ */
+export interface ApiKeyInsert {
+  key_hash: string;
+  tier: ApiKeyTier;
+  status: ApiKeyStatus;
+  label?: string | null;
+  last_used_at?: string | null;
+}
+
+// =============================================================================
 // Helper Functions
 // =============================================================================
 
