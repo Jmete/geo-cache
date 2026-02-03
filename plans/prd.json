@@ -751,7 +751,7 @@
         "Verify allowed origins are properly configured for the deployment.",
         "Document and validate rollback by deploying a known previous version and confirming service restoration."
       ],
-      "passes": false,
+      "passes": true,
       "risk": "medium",
       "owner": "devops"
     },

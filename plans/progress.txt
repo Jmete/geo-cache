@@ -335,3 +335,9 @@
 - Decisions: lightweight KV/D1 stubs + mocked fetch to keep tests deterministic
 - Files: src/integration/security.test.ts, plans/prd.json, plans/progress.txt
 - Notes: none
+
+## F043 - Deploy + Rollback Verification [COMPLETE]
+- Completed: deployed Worker with valid bindings/secrets; /health + /v1/geocode confirmed working on current deployment
+- Decisions: noted rollback to prior deployment caused Origin not allowed; redeploy resolved, suggesting prior version had allowlist mismatch
+- Files: plans/prd.json, plans/progress.txt
+- Notes: rollback path verified; re-test origin allowlist if rolling back to older builds
