@@ -9,3 +9,6 @@ coverage/
 
 wrangler.toml
 .dev.vars
+
+inputs.txt
+provider-inputs.txt
