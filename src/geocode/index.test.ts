@@ -244,6 +244,86 @@ describe('resolveGeocode', () => {
     expect(thirdUrl).toContain('q=Tabuk');
   });
 
+  it('falls back to region-level result when city candidate is missing', async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 1,
+            geonames: [
+              {
+                geonameId: 108662,
+                countryCode: 'SA',
+                countryName: 'Saudi Arabia',
+                name: 'Tabuk',
+                lat: '28.3979',
+                lng: '36.5662',
+                fcl: 'A',
+                fcode: 'ADM1',
+                adminName1: 'Tabuk',
+              },
+            ],
+          }),
+      } as Response);
+
+    const { kv } = createMockKv();
+    const { db } = createMockD1(new Map());
+
+    const response = await resolveGeocode(
+      'Nonexistent City, Tabuk, Saudi Arabia',
+      {
+        kv,
+        db,
+        geonamesUsername: 'test',
+      }
+    );
+
+    expect(response.granularity).toBe('region');
+    expect(response.canonical.admin1).toBe('Tabuk');
+    expect(response.canonical.city).toBeUndefined();
+    expect(response.point).toEqual({ lat: 28.3979, lon: 36.5662 });
+    expect(response.flags.providerFallback).toBe(true);
+    expect(response.flags.ambiguous).toBeFalsy();
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+    const fifthUrl = fetchMock.mock.calls[4]?.[0] as string;
+    expect(fifthUrl).toContain('q=Tabuk');
+    expect(fifthUrl).toContain('featureCode=ADM1');
+  });
+
   it('returns low-confidence response when provider yields no candidates', async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock

@@ -213,6 +213,35 @@ export class GeoNamesProvider implements Provider {
         }
       }
 
+      if (query.admin1) {
+        const regionResults = await searchAdmin1(
+          query.admin1,
+          query.countryIso2,
+          geoNamesConfig
+        );
+        const regionCandidates = regionResults
+          .map((result) => mapAdmin1Candidate(result, query.countryIso2))
+          .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+
+        if (regionCandidates.length > 0) {
+          return { candidates: regionCandidates, usedFallback: true };
+        }
+
+        const fallbackRegionResults = await searchAdmin1(
+          query.admin1,
+          query.countryIso2,
+          geoNamesConfig,
+          { featureCode: null }
+        );
+        const fallbackRegionCandidates = fallbackRegionResults
+          .map((result) => mapAdmin1Candidate(result, query.countryIso2))
+          .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+
+        if (fallbackRegionCandidates.length > 0) {
+          return { candidates: fallbackRegionCandidates, usedFallback: true };
+        }
+      }
+
       return { candidates: [], usedFallback: false };
     }
 

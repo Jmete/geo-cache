@@ -418,3 +418,9 @@
 - Decisions: city provider now retries deterministic aliases (`<name> City`, `City of <name>`) after strict+relaxed primary query; marks usedFallback when alias path used
 - Files: src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/geocode/index.test.ts, plans/progress.txt
 - Notes: frontend should still null-check `point` for genuinely unresolved locations
+
+## GeoNames - Region fallback for unresolved city queries [NON-PRD]
+- Task: add API fallback so `city, region, country` downgrades to `region, country` when city candidates are missing
+- Decisions: in city flow, after city strict/relaxed + alias retries fail, run ADM1 strict then relaxed search using input admin1; return region candidates with providerFallback=true
+- Files: src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/geocode/index.test.ts, plans/progress.txt
+- Notes: reduces ambiguous no-point responses for partial GeoNames coverage while preserving deterministic selection

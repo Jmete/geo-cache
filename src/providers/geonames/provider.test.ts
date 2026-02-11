@@ -167,6 +167,89 @@ describe('GeoNamesProvider (city search)', () => {
     expect(result.candidates).toHaveLength(1);
   });
 
+  it('falls back to region search when city search has no candidates', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 1,
+            geonames: [
+              {
+                geonameId: 108662,
+                countryCode: 'SA',
+                countryName: 'Saudi Arabia',
+                name: 'Tabuk',
+                lat: '28.3979',
+                lng: '36.5662',
+                fcl: 'A',
+                fcode: 'ADM1',
+                adminName1: 'Tabuk',
+              },
+            ],
+          }),
+      });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      {
+        city: 'Nonexistent City',
+        admin1: 'Tabuk',
+        countryIso2: 'SA',
+        granularityHint: 'city',
+      },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(5);
+    const cityStrictUrl = mockFetch.mock.calls[0]?.[0] as string;
+    const cityFallbackUrl = mockFetch.mock.calls[1]?.[0] as string;
+    const cityAliasStrictUrl = mockFetch.mock.calls[2]?.[0] as string;
+    const cityAliasFallbackUrl = mockFetch.mock.calls[3]?.[0] as string;
+    const regionUrl = mockFetch.mock.calls[4]?.[0] as string;
+    expect(cityStrictUrl).toContain('q=Nonexistent+City');
+    expect(cityFallbackUrl).toContain('q=Nonexistent+City');
+    expect(cityAliasStrictUrl).toContain('q=Nonexistent');
+    expect(cityAliasFallbackUrl).toContain('q=Nonexistent');
+    expect(regionUrl).toContain('q=Tabuk');
+    expect(regionUrl).toContain('featureCode=ADM1');
+    expect(result.usedFallback).toBe(true);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0]?.admin1).toBe('Tabuk');
+  });
+
   it('maps GeoNames results to provider candidates with lat/lon and providerId', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
