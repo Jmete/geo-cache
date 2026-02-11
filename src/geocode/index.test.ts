@@ -184,6 +184,66 @@ describe('resolveGeocode', () => {
     expect(kvCaptured.lastPut?.key).toBe(response.normalizedKey);
   });
 
+  it('resolves city queries that include a trailing city suffix', async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 1,
+            geonames: [
+              {
+                geonameId: 101628,
+                countryCode: 'SA',
+                countryName: 'Saudi Arabia',
+                name: 'Tabuk',
+                lat: '28.3998',
+                lng: '36.5715',
+                fcl: 'P',
+                fcode: 'PPLA',
+                adminName1: 'Tabuk',
+              },
+            ],
+          }),
+      } as Response);
+
+    const { kv } = createMockKv();
+    const { db } = createMockD1(new Map());
+
+    const response = await resolveGeocode(
+      'Tabuk City, Tabuk, Saudi Arabia',
+      {
+        kv,
+        db,
+        geonamesUsername: 'test',
+      }
+    );
+
+    expect(response.point).toEqual({ lat: 28.3998, lon: 36.5715 });
+    expect(response.flags.providerFallback).toBe(true);
+    expect(response.flags.ambiguous).toBeFalsy();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const thirdUrl = fetchMock.mock.calls[2]?.[0] as string;
+    expect(thirdUrl).toContain('q=Tabuk');
+  });
+
   it('returns low-confidence response when provider yields no candidates', async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock

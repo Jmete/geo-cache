@@ -412,3 +412,9 @@
 - Decisions: set inclBbox at client fetch layer so all search modes inherit; no API surface changes
 - Files: src/providers/geonames/client.ts, src/providers/geonames/client.test.ts, src/providers/geonames/provider.test.ts
 - Notes: none
+
+## GeoNames - City suffix alias retry for city search [NON-PRD]
+- Task: prevent false no-candidate fallbacks for inputs like "Tabuk City, Tabuk, Saudi Arabia" that led to point-less responses and UI crashes
+- Decisions: city provider now retries deterministic aliases (`<name> City`, `City of <name>`) after strict+relaxed primary query; marks usedFallback when alias path used
+- Files: src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/geocode/index.test.ts, plans/progress.txt
+- Notes: frontend should still null-check `point` for genuinely unresolved locations

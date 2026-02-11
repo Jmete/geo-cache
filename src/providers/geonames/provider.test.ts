@@ -109,6 +109,64 @@ describe('GeoNamesProvider (city search)', () => {
     expect(result.candidates).toHaveLength(1);
   });
 
+  it('retries with city alias when city name contains a city suffix', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 1,
+            geonames: [
+              {
+                geonameId: 101628,
+                countryCode: 'SA',
+                countryName: 'Saudi Arabia',
+                name: 'Tabuk',
+                lat: '28.3998',
+                lng: '36.5715',
+                fcl: 'P',
+                fcode: 'PPLA',
+                adminName1: 'Tabuk',
+              },
+            ],
+          }),
+      });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      { city: 'Tabuk City', countryIso2: 'SA', granularityHint: 'city' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+    const firstUrl = mockFetch.mock.calls[0]?.[0] as string;
+    const secondUrl = mockFetch.mock.calls[1]?.[0] as string;
+    const thirdUrl = mockFetch.mock.calls[2]?.[0] as string;
+    expect(firstUrl).toContain('q=Tabuk+City');
+    expect(secondUrl).toContain('q=Tabuk+City');
+    expect(secondUrl).not.toContain('featureClass=P');
+    expect(thirdUrl).toContain('q=Tabuk');
+    expect(thirdUrl).toContain('featureClass=P');
+    expect(result.usedFallback).toBe(true);
+    expect(result.candidates).toHaveLength(1);
+  });
+
   it('maps GeoNames results to provider candidates with lat/lon and providerId', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,

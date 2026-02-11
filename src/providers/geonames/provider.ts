@@ -150,6 +150,27 @@ function mapCountryCandidate(
   return mapBaseCandidate(result, fallbackCountryIso2);
 }
 
+function buildCityQueryVariants(city: string): string[] {
+  const trimmed = city.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const variants = new Set<string>([trimmed]);
+
+  const withoutCitySuffix = trimmed.replace(/\s+city$/i, '').trim();
+  if (withoutCitySuffix) {
+    variants.add(withoutCitySuffix);
+  }
+
+  const withoutCityPrefix = trimmed.replace(/^city\s+of\s+/i, '').trim();
+  if (withoutCityPrefix) {
+    variants.add(withoutCityPrefix);
+  }
+
+  return Array.from(variants);
+}
+
 export class GeoNamesProvider implements Provider {
   readonly name = 'geonames';
 
@@ -159,31 +180,37 @@ export class GeoNamesProvider implements Provider {
   ): Promise<ProviderSearchResult> {
     const geoNamesConfig = toGeoNamesConfig(config);
     if (query.granularityHint === 'city' && query.city) {
-      const results = await searchCity(
-        query.city,
-        query.countryIso2,
-        geoNamesConfig
-      );
-      const candidates = results
-        .map((result) => mapCityCandidate(result, query.countryIso2))
-        .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+      const cityVariants = buildCityQueryVariants(query.city);
 
-      if (candidates.length > 0) {
-        return { candidates, usedFallback: false };
-      }
+      for (const [index, cityVariant] of cityVariants.entries()) {
+        const isAliasVariant = index > 0;
 
-      const fallbackResults = await searchCity(
-        query.city,
-        query.countryIso2,
-        geoNamesConfig,
-        { featureClass: null, fuzzy: 1 }
-      );
-      const fallbackCandidates = fallbackResults
-        .map((result) => mapCityCandidate(result, query.countryIso2))
-        .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+        const results = await searchCity(
+          cityVariant,
+          query.countryIso2,
+          geoNamesConfig
+        );
+        const candidates = results
+          .map((result) => mapCityCandidate(result, query.countryIso2))
+          .filter((candidate): candidate is ProviderCandidate => candidate !== null);
 
-      if (fallbackCandidates.length > 0) {
-        return { candidates: fallbackCandidates, usedFallback: true };
+        if (candidates.length > 0) {
+          return { candidates, usedFallback: isAliasVariant };
+        }
+
+        const fallbackResults = await searchCity(
+          cityVariant,
+          query.countryIso2,
+          geoNamesConfig,
+          { featureClass: null, fuzzy: 1 }
+        );
+        const fallbackCandidates = fallbackResults
+          .map((result) => mapCityCandidate(result, query.countryIso2))
+          .filter((candidate): candidate is ProviderCandidate => candidate !== null);
+
+        if (fallbackCandidates.length > 0) {
+          return { candidates: fallbackCandidates, usedFallback: true };
+        }
       }
 
       return { candidates: [], usedFallback: false };
