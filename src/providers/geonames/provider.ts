@@ -279,7 +279,9 @@ export class GeoNamesProvider implements Provider {
     if (query.granularityHint === 'country' || query.granularityHint === 'multi') {
       const countryQuery =
         getCountryName(query.countryIso2) ?? query.countryIso2;
-      const result = await searchCountryPCLI(countryQuery, geoNamesConfig);
+      const result = await searchCountryPCLI(countryQuery, geoNamesConfig, {
+        expectedCountryIso2: query.countryIso2,
+      });
       if (!result) {
         return { candidates: [], usedFallback: false };
       }

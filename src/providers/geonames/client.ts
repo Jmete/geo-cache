@@ -11,6 +11,15 @@ const DEFAULT_CITY_MAX_ROWS = 10;
 const DEFAULT_CITY_FUZZY = 0.8;
 const DEFAULT_ADMIN1_MAX_ROWS = 10;
 const DEFAULT_ADMIN1_FUZZY = 0.8;
+const DEFAULT_COUNTRY_MAX_ROWS = 5;
+const DEFAULT_COUNTRY_FEATURE_CODES = [
+  'PCLI',
+  'PCLD',
+  'PCLF',
+  'PCLS',
+  'PCLIX',
+  'TERR',
+] as const;
 
 // =============================================================================
 // Types
@@ -48,6 +57,11 @@ interface GeoNamesResponse {
 
 type GeoNamesParamValue = string | string[];
 type GeoNamesParams = Record<string, GeoNamesParamValue>;
+
+export interface GeoNamesCountrySearchOptions {
+  expectedCountryIso2?: string;
+  featureCodes?: readonly string[];
+}
 
 function buildGeoNamesUrl(params: GeoNamesParams, username: string): string {
   const url = new URL(GEONAMES_BASE_URL);
@@ -166,18 +180,45 @@ export class ProviderFetchError extends Error {
  */
 export async function searchCountryPCLI(
   query: string,
-  config: GeoNamesConfig
+  config: GeoNamesConfig,
+  options: GeoNamesCountrySearchOptions = {}
 ): Promise<GeoNamesSearchResult | null> {
+  const expectedCountryIso2 = options.expectedCountryIso2?.trim().toUpperCase();
+  const featureCodes =
+    options.featureCodes && options.featureCodes.length > 0
+      ? options.featureCodes
+      : DEFAULT_COUNTRY_FEATURE_CODES;
+
+  const params: GeoNamesParams = {
+    q: query,
+    featureCode: [...featureCodes],
+    maxRows: String(DEFAULT_COUNTRY_MAX_ROWS),
+  };
+
+  if (expectedCountryIso2) {
+    params.country = expectedCountryIso2;
+  }
+
   const results = await fetchGeoNames(
-    {
-      q: query,
-      featureCode: 'PCLI',
-      maxRows: '1',
-    },
+    params,
     config
   );
 
-  return results[0] ?? null;
+  if (results.length === 0) {
+    return null;
+  }
+
+  if (!expectedCountryIso2) {
+    return results[0] ?? null;
+  }
+
+  return (
+    results.find(
+      (result) => result.countryCode?.trim().toUpperCase() === expectedCountryIso2
+    ) ??
+    results[0] ??
+    null
+  );
 }
 
 export interface GeoNamesCitySearchOptions {

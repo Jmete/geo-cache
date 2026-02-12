@@ -184,6 +184,47 @@ describe('resolveGeocode', () => {
     expect(kvCaptured.lastPut?.key).toBe(response.normalizedKey);
   });
 
+  it('resolves single-token dependent territory queries (Hong Kong)', async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 1,
+          geonames: [
+            {
+              geonameId: 1819730,
+              countryCode: 'HK',
+              countryName: 'Hong Kong',
+              name: 'Hong Kong',
+              lat: '22.2783',
+              lng: '114.1747',
+              fcl: 'A',
+              fcode: 'PCLD',
+            },
+          ],
+        }),
+    } as Response);
+
+    const { kv } = createMockKv();
+    const { db } = createMockD1(new Map());
+
+    const response = await resolveGeocode('Hong Kong', {
+      kv,
+      db,
+      geonamesUsername: 'test',
+    });
+
+    expect(response.cache.hit).toBe(false);
+    expect(response.granularity).toBe('country');
+    expect(response.canonical.countryIso2).toBe('HK');
+    expect(response.canonical.countryName).toBe('Hong Kong');
+    expect(response.point).toEqual({ lat: 22.2783, lon: 114.1747 });
+    const calledUrl = fetchMock.mock.calls[0]?.[0] as string;
+    expect(calledUrl).toContain('country=HK');
+    expect(calledUrl).toContain('featureCode=PCLD');
+  });
+
   it('resolves city queries that include a trailing city suffix', async () => {
     const fetchMock = vi.mocked(fetch);
     fetchMock

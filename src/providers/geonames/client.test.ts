@@ -87,6 +87,48 @@ describe('searchCountryPCLI', () => {
 
       expect(result).toBeNull();
     });
+
+    it('prefers result matching expected country ISO2 when provided', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 2,
+            geonames: [
+              {
+                geonameId: 1814991,
+                countryCode: 'CN',
+                countryName: 'China',
+                name: 'Hong Kong',
+                lat: '22.3',
+                lng: '114.2',
+                fcl: 'A',
+                fcode: 'PCLI',
+              },
+              {
+                geonameId: 1819730,
+                countryCode: 'HK',
+                countryName: 'Hong Kong',
+                name: 'Hong Kong',
+                lat: '22.2783',
+                lng: '114.1747',
+                fcl: 'A',
+                fcode: 'PCLD',
+              },
+            ],
+          }),
+      });
+
+      const result = await searchCountryPCLI(
+        'Hong Kong',
+        { username: 'testuser' },
+        { expectedCountryIso2: 'HK' }
+      );
+
+      expect(result).not.toBeNull();
+      expect(result?.countryCode).toBe('HK');
+      expect(result?.fcode).toBe('PCLD');
+    });
   });
 
   describe('F016 Step 1: correct API parameters', () => {
@@ -110,8 +152,9 @@ describe('searchCountryPCLI', () => {
       expect(calledUrl).toContain('secure.geonames.org/searchJSON');
       expect(calledUrl).toContain('q=Test+Query');
       expect(calledUrl).toContain('featureCode=PCLI');
+      expect(calledUrl).toContain('featureCode=PCLD');
       expect(calledUrl).toContain('inclBbox=true');
-      expect(calledUrl).toContain('maxRows=1');
+      expect(calledUrl).toContain('maxRows=5');
       expect(calledUrl).toContain('username=myusername');
     });
   });

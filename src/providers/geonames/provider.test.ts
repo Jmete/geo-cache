@@ -460,7 +460,7 @@ describe('GeoNamesProvider (country search)', () => {
     vi.restoreAllMocks();
   });
 
-  it('builds PCLI query for country lookups', async () => {
+  it('builds country query for country lookups', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () =>
@@ -481,9 +481,11 @@ describe('GeoNamesProvider (country search)', () => {
     const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
     expect(calledUrl).toContain('secure.geonames.org/searchJSON');
     expect(calledUrl).toContain('q=Saudi+Arabia');
+    expect(calledUrl).toContain('country=SA');
     expect(calledUrl).toContain('featureCode=PCLI');
+    expect(calledUrl).toContain('featureCode=PCLD');
     expect(calledUrl).toContain('inclBbox=true');
-    expect(calledUrl).toContain('maxRows=1');
+    expect(calledUrl).toContain('maxRows=5');
   });
 
   it('treats multi granularity as country lookup', async () => {
@@ -517,9 +519,11 @@ describe('GeoNamesProvider (country search)', () => {
     const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
     expect(calledUrl).toContain('secure.geonames.org/searchJSON');
     expect(calledUrl).toContain('q=Saudi+Arabia');
+    expect(calledUrl).toContain('country=SA');
     expect(calledUrl).toContain('featureCode=PCLI');
+    expect(calledUrl).toContain('featureCode=PCLD');
     expect(calledUrl).toContain('inclBbox=true');
-    expect(calledUrl).toContain('maxRows=1');
+    expect(calledUrl).toContain('maxRows=5');
     expect(result.candidates).toHaveLength(1);
     const candidate = result.candidates[0];
     if (!candidate) {
@@ -579,5 +583,44 @@ describe('GeoNamesProvider (country search)', () => {
     expect(candidate.bbox).toEqual([34, 16, 56, 32]);
     expect(candidate.admin1).toBeUndefined();
     expect(candidate.city).toBeUndefined();
+  });
+
+  it('maps dependent territory country records (Hong Kong/PCLD)', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          totalResultsCount: 1,
+          geonames: [
+            {
+              geonameId: 1819730,
+              countryCode: 'HK',
+              countryName: 'Hong Kong',
+              name: 'Hong Kong',
+              lat: '22.2783',
+              lng: '114.1747',
+              fcl: 'A',
+              fcode: 'PCLD',
+            },
+          ],
+        }),
+    });
+
+    const provider = new GeoNamesProvider();
+    const result = await provider.search(
+      { countryIso2: 'HK', granularityHint: 'country' },
+      { timeout: 5000, credentials: { username: 'testuser' } }
+    );
+
+    expect(result.candidates).toHaveLength(1);
+    const candidate = result.candidates[0];
+    if (!candidate) {
+      throw new Error('Expected candidate to be defined');
+    }
+    expect(candidate.countryIso2).toBe('HK');
+    expect(candidate.countryName).toBe('Hong Kong');
+    expect(candidate.featureCode).toBe('PCLD');
+    expect(candidate.city).toBeUndefined();
+    expect(candidate.admin1).toBeUndefined();
   });
 });

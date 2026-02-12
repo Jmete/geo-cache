@@ -424,3 +424,9 @@
 - Decisions: in city flow, after city strict/relaxed + alias retries fail, run ADM1 strict then relaxed search using input admin1; return region candidates with providerFallback=true
 - Files: src/providers/geonames/provider.ts, src/providers/geonames/provider.test.ts, src/geocode/index.test.ts, plans/progress.txt
 - Notes: reduces ambiguous no-point responses for partial GeoNames coverage while preserving deterministic selection
+
+## Bugfix - Country lookup fallback for dependent territories [NON-PRD]
+- Task: Fix single-token country lookups failing for territory-like GeoNames feature codes (e.g., Hong Kong)
+- Decisions: Better than hardcoded alias list; expanded country search featureCode allowlist (PCLI,PCLD,PCLF,PCLS,PCLIX,TERR) + expected ISO2 filter for deterministic match
+- Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/client.test.ts, src/providers/geonames/provider.test.ts, src/geocode/index.test.ts, plans/progress.txt
+- Notes: Keeps existing behavior for standard countries; adds coverage for single-token `Hong Kong` flow
