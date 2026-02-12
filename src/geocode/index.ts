@@ -29,6 +29,8 @@ import type { Logger } from '../logging';
 const PROVIDERS = [new GeoNamesProvider()];
 const DEFAULT_PROVIDER_TIMEOUT_MS = 7000;
 const LOW_CONFIDENCE_SCORE = 0.1;
+const SAUDI_ARABIA_ISO2 = 'SA';
+const SAUDI_AL_PREFIX_PATTERN = /^al[\s-]+/i;
 
 export interface ResolveGeocodeDependencies {
   kv: KVNamespace;
@@ -175,6 +177,25 @@ function buildProviderQuery(parsed: ParsedLocation, countryIso2: string) {
   return query;
 }
 
+function buildSaudiAlRetryParsed(
+  parsed: ParsedLocation,
+  countryIso2: string
+): ParsedLocation | null {
+  if (countryIso2.toUpperCase() !== SAUDI_ARABIA_ISO2) {
+    return null;
+  }
+
+  const admin1 = cleanToken(parsed.admin1);
+  if (!admin1 || SAUDI_AL_PREFIX_PATTERN.test(admin1)) {
+    return null;
+  }
+
+  return {
+    ...parsed,
+    admin1: `Al ${admin1}`,
+  };
+}
+
 function providerNameForResult(
   providerNames: string[],
   providers: Provider[]
@@ -240,6 +261,190 @@ async function recordEventSafely(
       errorType: error instanceof Error ? error.name : 'UnknownError',
     });
   }
+}
+
+interface PersistResolvedParams {
+  db: D1Database;
+  kv: KVNamespace;
+  logger: Logger | undefined;
+  text: string;
+  normalizedKey: string;
+  requestId: string | null;
+  response: GeocodeResponse;
+  provider: string;
+  providerId: string;
+  candidates: number;
+  usedFallback: boolean;
+  hadTimeout: boolean;
+  hadError: boolean;
+  retryStrategy?: string;
+}
+
+async function persistResolvedResponse(
+  params: PersistResolvedParams
+): Promise<void> {
+  const {
+    db,
+    kv,
+    logger,
+    text,
+    normalizedKey,
+    requestId,
+    response,
+    provider,
+    providerId,
+    candidates,
+    usedFallback,
+    hadTimeout,
+    hadError,
+    retryStrategy,
+  } = params;
+  const eventStatus: EventStatus =
+    response.flags?.ambiguous ? 'ambiguous' : 'resolved';
+
+  await Promise.all([
+    upsertGeocodeToD1(db, response, providerId),
+    writeGeocodeToKv(kv, normalizedKey, response),
+    recordEventSafely(db, logger, {
+      inputRaw: text,
+      normalizedKey,
+      status: eventStatus,
+      provider,
+      providerResponse: {
+        candidates,
+        usedFallback,
+        hadTimeout,
+        hadError,
+        ambiguous: response.flags?.ambiguous ?? false,
+        ...(retryStrategy ? { retryStrategy } : {}),
+      },
+      requestId,
+    }),
+  ]);
+}
+
+interface SaudiRetryResult {
+  response: GeocodeResponse;
+  providerId: string;
+  provider: string;
+  candidates: number;
+  usedFallback: boolean;
+  hadTimeout: boolean;
+  hadError: boolean;
+}
+
+async function trySaudiAlRetry(params: {
+  text: string;
+  key: string;
+  parsed: ParsedLocation;
+  countryIso2: string;
+  providers: Provider[];
+  geonamesUsername: string;
+  timeoutMs: number;
+  logger: Logger | undefined;
+}): Promise<SaudiRetryResult | null> {
+  const { text, key, parsed, countryIso2, providers, geonamesUsername, timeoutMs, logger } =
+    params;
+  const retryParsed = buildSaudiAlRetryParsed(parsed, countryIso2);
+  if (!retryParsed) {
+    return null;
+  }
+
+  const retryQuery = buildProviderQuery(retryParsed, countryIso2);
+  logger?.info('geocode.retry', {
+    strategy: 'saudi_al_prefix',
+    originalAdmin1: parsed.admin1 ?? null,
+    retryAdmin1: retryParsed.admin1 ?? null,
+  });
+  const retryStart = Date.now();
+  const retryResult = await runPipelineStrict(retryQuery, {
+    providers,
+    timeout: timeoutMs,
+    credentials: {
+      geonames: { username: geonamesUsername },
+    },
+  });
+  const retryDurationMs = Date.now() - retryStart;
+
+  if (!retryResult.success) {
+    logger?.warn('geocode.retry_failed', {
+      strategy: 'saudi_al_prefix',
+      cache: 'provider',
+      durationMs: retryDurationMs,
+      hadTimeout: retryResult.hadTimeout,
+      errorCount: retryResult.errors.length,
+    });
+    return null;
+  }
+
+  const {
+    candidates,
+    providersUsed,
+    usedFallback,
+    hadTimeout,
+    hadError,
+  } = retryResult.result;
+  if (candidates.length === 0) {
+    logger?.info('geocode.retry_no_candidates', {
+      strategy: 'saudi_al_prefix',
+      cache: 'provider',
+      durationMs: retryDurationMs,
+      usedFallback,
+      hadTimeout,
+      hadError,
+    });
+    return null;
+  }
+
+  const scored = scoreCandidates(candidates, {
+    countryIso2,
+    admin1: retryParsed.admin1 ?? null,
+    city: retryParsed.city ?? null,
+    granularityHint: retryQuery.granularityHint,
+  });
+  const selection = selectBestCandidate(scored, countryIso2);
+  if (!selection.best || selection.confidence === null) {
+    logger?.info('geocode.retry_selection_failed', {
+      strategy: 'saudi_al_prefix',
+      cache: 'provider',
+      durationMs: retryDurationMs,
+      candidates: candidates.length,
+    });
+    return null;
+  }
+
+  const provider = providerNameForResult(providersUsed, providers);
+  const response = buildResponseFromCandidate({
+    text,
+    key,
+    parsed: retryParsed,
+    candidate: selection.best,
+    confidence: selection.confidence,
+    ambiguous: selection.ambiguous,
+    usedFallback,
+    provider,
+  });
+
+  logger?.info('geocode.retry_success', {
+    strategy: 'saudi_al_prefix',
+    cache: 'provider',
+    durationMs: retryDurationMs,
+    provider,
+    candidates: candidates.length,
+    usedFallback,
+    hadTimeout,
+    hadError,
+  });
+
+  return {
+    response,
+    providerId: selection.best.providerId,
+    provider,
+    candidates: candidates.length,
+    usedFallback,
+    hadTimeout,
+    hadError,
+  };
 }
 
 export async function resolveGeocode(
@@ -385,6 +590,36 @@ export async function resolveGeocode(
   });
 
   if (candidates.length === 0) {
+    const retryResult = await trySaudiAlRetry({
+      text,
+      key: cacheKey.key,
+      parsed: cacheKey.parsed,
+      countryIso2: cacheKey.countryIso2,
+      providers,
+      geonamesUsername,
+      timeoutMs,
+      logger,
+    });
+    if (retryResult) {
+      await persistResolvedResponse({
+        db,
+        kv,
+        logger,
+        text,
+        normalizedKey: cacheKey.key,
+        requestId,
+        response: retryResult.response,
+        provider: retryResult.provider,
+        providerId: retryResult.providerId,
+        candidates: retryResult.candidates,
+        usedFallback: retryResult.usedFallback,
+        hadTimeout: retryResult.hadTimeout,
+        hadError: retryResult.hadError,
+        retryStrategy: 'saudi_al_prefix',
+      });
+      return retryResult.response;
+    }
+
     logger?.warn('geocode.fallback', {
       reason: 'no_candidates',
       cache: 'provider',
@@ -425,6 +660,36 @@ export async function resolveGeocode(
 
   const selection = selectBestCandidate(scored, cacheKey.countryIso2);
   if (!selection.best || selection.confidence === null) {
+    const retryResult = await trySaudiAlRetry({
+      text,
+      key: cacheKey.key,
+      parsed: cacheKey.parsed,
+      countryIso2: cacheKey.countryIso2,
+      providers,
+      geonamesUsername,
+      timeoutMs,
+      logger,
+    });
+    if (retryResult) {
+      await persistResolvedResponse({
+        db,
+        kv,
+        logger,
+        text,
+        normalizedKey: cacheKey.key,
+        requestId,
+        response: retryResult.response,
+        provider: retryResult.provider,
+        providerId: retryResult.providerId,
+        candidates: retryResult.candidates,
+        usedFallback: retryResult.usedFallback,
+        hadTimeout: retryResult.hadTimeout,
+        hadError: retryResult.hadError,
+        retryStrategy: 'saudi_al_prefix',
+      });
+      return retryResult.response;
+    }
+
     logger?.warn('geocode.fallback', {
       reason: 'selection_failed',
       cache: 'provider',
@@ -467,27 +732,21 @@ export async function resolveGeocode(
     provider: resolvedProviderName,
   });
 
-  const eventStatus: EventStatus =
-    response.flags?.ambiguous ? 'ambiguous' : 'resolved';
-
-  await Promise.all([
-    upsertGeocodeToD1(db, response, selection.best.providerId),
-    writeGeocodeToKv(kv, cacheKey.key, response),
-    recordEventSafely(db, logger, {
-      inputRaw: text,
-      normalizedKey: cacheKey.key,
-      status: eventStatus,
-      provider: resolvedProviderName,
-      providerResponse: {
-        candidates: candidates.length,
-        usedFallback,
-        hadTimeout,
-        hadError,
-        ambiguous: response.flags?.ambiguous ?? false,
-      },
-      requestId,
-    }),
-  ]);
+  await persistResolvedResponse({
+    db,
+    kv,
+    logger,
+    text,
+    normalizedKey: cacheKey.key,
+    requestId,
+    response,
+    provider: resolvedProviderName,
+    providerId: selection.best.providerId,
+    candidates: candidates.length,
+    usedFallback,
+    hadTimeout,
+    hadError,
+  });
 
   return response;
 }

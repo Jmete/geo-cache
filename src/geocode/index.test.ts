@@ -399,4 +399,65 @@ describe('resolveGeocode', () => {
     expect(response.confidence).toBeLessThan(0.2);
     expect(d1Captured.insertCount).toBe(2);
   });
+
+  it('retries Saudi region lookups with Al prefix before low-confidence fallback', async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 0,
+            geonames: [],
+          }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            totalResultsCount: 1,
+            geonames: [
+              {
+                geonameId: 109578,
+                countryCode: 'SA',
+                countryName: 'Saudi Arabia',
+                name: 'Al Bahah',
+                lat: '20.0129',
+                lng: '41.4677',
+                fcl: 'A',
+                fcode: 'ADM1',
+                adminName1: 'Al Bahah Region',
+              },
+            ],
+          }),
+      } as Response);
+
+    const { kv } = createMockKv();
+    const { db } = createMockD1(new Map());
+
+    const response = await resolveGeocode('Baha Region, Saudi Arabia', {
+      kv,
+      db,
+      geonamesUsername: 'test',
+    });
+
+    expect(response.cache.hit).toBe(false);
+    expect(response.flags.ambiguous).toBeFalsy();
+    expect(response.confidence).toBeGreaterThan(0.2);
+    expect(response.point).toEqual({ lat: 20.0129, lon: 41.4677 });
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const firstUrl = new URL(fetchMock.mock.calls[0]?.[0] as string);
+    const thirdUrl = new URL(fetchMock.mock.calls[2]?.[0] as string);
+    expect(firstUrl.searchParams.get('q')).toBe('Baha Region');
+    expect(thirdUrl.searchParams.get('q')).toBe('Al Baha Region');
+  });
 });

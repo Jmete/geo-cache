@@ -430,3 +430,9 @@
 - Decisions: Better than hardcoded alias list; expanded country search featureCode allowlist (PCLI,PCLD,PCLF,PCLS,PCLIX,TERR) + expected ISO2 filter for deterministic match
 - Files: src/providers/geonames/client.ts, src/providers/geonames/provider.ts, src/providers/geonames/client.test.ts, src/providers/geonames/provider.test.ts, src/geocode/index.test.ts, plans/progress.txt
 - Notes: Keeps existing behavior for standard countries; adds coverage for single-token `Hong Kong` flow
+
+## Bugfix - Saudi "Al" region retry on low-confidence no-point path [NON-PRD]
+- Task: when SA lookup falls to low-confidence/no-point (no candidates or selection fail), retry provider once with `Al ` prefixed to admin1 (e.g., `Baha Region` -> `Al Baha Region`)
+- Decisions: retry only for countryIso2=SA + admin1 present + not already prefixed; do not throw on retry provider errors/timeouts (continue fallback); persist retry success like normal resolved hits
+- Files: src/geocode/index.ts, src/geocode/index.test.ts, plans/progress.txt
+- Notes: preserves deterministic cache key from original input while improving point resolution for Saudi region naming variants
